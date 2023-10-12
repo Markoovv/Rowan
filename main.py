@@ -1,6 +1,9 @@
 import discord
+import configparser
 from random import choice, randint
 
+config = configparser.ConfigParser()
+config.read('config.ini')
 client = discord.Client(intents=discord.Intents.all(), options=8)
 
 @client.event
@@ -33,5 +36,4 @@ async def on_message(message):
             await message.channel.send('Да')
         else:
             await message.channel.send('Нет')
-
-client.run('Removed for obvious reasons :)')
+client.run(config['Token']['token'])
