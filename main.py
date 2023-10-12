@@ -18,7 +18,7 @@ async def on_message(message):
         return
     
     if message.content == ('&help'):
-        await message.channel.send("Вот список доступных комманд:\n&help - Показывает эту подсказку\n&eval - Решает введённый пример (ВЫКЛЮЧЕНО)\n&blable - Повторяет фразу, введённую после команды\n&ask даёт ответ да/нет\n&dice Кидает кубик с указанным количеством граней")
+        await message.channel.send("Вот список доступных комманд:\n&help - Показывает эту подсказку\n&eval - Решает введённый пример (ВЫКЛЮЧЕНО)\n&blable - Повторяет фразу, введённую после команды\n&ask даёт ответ да/нет\n&dice Кидает кубик с указанным количеством граней\n&info Выводит информацию о боте")
     if message.content.startswith('&eval '):
         print('Попытка вызвать команду eval')
         return
@@ -38,4 +38,6 @@ async def on_message(message):
             await message.channel.send('Да')
         else:
             await message.channel.send('Нет')
+    if message.content == ('&info'):
+        await message.channel.send('Я бот разработанный V&I dev, Владом в частности. Версия 0.2.\nВизитка автора: https://vladzodchey.carrd.co/')
 client.run(config['Token']['token'])
