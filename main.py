@@ -1,3 +1,5 @@
+# Rowan bot by VladZodchey
+
 import discord
 import configparser
 from random import choice, randint
