@@ -40,4 +40,4 @@ async def on_message(message):
             await message.channel.send('Нет')
     if message.content == ('&info'):
         await message.channel.send('Я бот разработанный V&I dev, Владом в частности. Версия 0.2.\nВизитка автора: https://vladzodchey.carrd.co/')
-client.run(config['Token']['token'])
+client.run(config['Prefs']['token'])
