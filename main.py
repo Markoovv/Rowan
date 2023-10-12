@@ -34,4 +34,4 @@ async def on_message(message):
         else:
             await message.channel.send('Нет')
 
-client.run('MTE1ODQ4MTU4MDg5ODEyNzg5Mg.GQzvaT.Gur9wEslFEjXe30EMd_h_H6znd1yFCZmEL1c6s')
+client.run('Removed for obvious reasons :)')
