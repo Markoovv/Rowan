@@ -20,8 +20,11 @@ async def on_message(message):
     if message.content == ('&help'):
         await message.channel.send("Here's a list of supported commands:\n&help - Displays this menu\n&info - Shows current Rowan version\n&blable - Copies you\n&ask - Gives you a yes/no answer\n&dice n - Throws a dice with n amount of sides")
     if message.content.startswith('&eval '):
-        await message.channel.send('Eval is disable due to security reasons!')
-        print('There was a try to call eval')
+        if message.content == '&eval 9+10' or message.content == '&eval 9 + 10':
+            await message.channel.send('21')
+            return
+        print('Tried to call eval function')
+        await message.channel.send('Eval function is disabled due to security reasons!')
         return
         try:
             await message.channel.send(eval(message.content[5::]))
