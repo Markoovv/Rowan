@@ -2,46 +2,44 @@
 
 import discord
 import configparser
-from random import choice, randint
+from random import randint, choice
 
 config = configparser.ConfigParser()
 config.read('config.ini')
 client = discord.Client(intents=discord.Intents.all(), options=8)
 
+token = config['Prefs']['token']
+version = config['Prefs']['version']
+
 @client.event
 async def on_ready():
     print('Login success {0.user}'.format(client))
-
 @client.event
-async def on_message(message):
-    if message.author == client.user:
+async def on_message(msg):
+    if msg.author == client.user:
         return
-    
-    if message.content == ('&help'):
-        await message.channel.send("Here's a list of supported commands:\n&help - Displays this menu\n&info - Shows current Rowan version\n&blable - Copies you\n&ask - Gives you a yes/no answer\n&dice n - Throws a dice with n amount of sides")
-    if message.content.startswith('&eval '):
-        if message.content == '&eval 9+10' or message.content == '&eval 9 + 10':
-            await message.channel.send('21')
-            return
-        print('Tried to call eval function')
-        await message.channel.send('Eval function is disabled due to security reasons!')
-        return
-        try:
-            await message.channel.send(eval(message.content[5::]))
-        except:
-            await message.channel.send('Failed to solve!')
-    if message.content.startswith('&blable '):
-        await message.channel.send(message.content[7::])
-    if message.content.startswith('&dice '):
-        try:
-            await message.channel.send(str(randint(1, int(message.content[5::]))))
-        except:
-            await message.channel.send('Failed to roll the dice!')
-    if message.content.startswith('&ask '):
-        if choice([True, False]) == True:
-            await message.channel.send('Yes')
-        else:
-            await message.channel.send('No')
-    if message.content == ('&info'):
-        await message.channel.send(f"Rowan bot ver. {config['Prefs']['version']}")
-client.run(config['Prefs']['token'])
+    match msg.content:
+        case '&help':
+            await msg.channel.send("Here's a list of implemented commands:\n&help - Displays this msg\n&ask <q> - gives you yes/no answer for q question\n&dice <n> - rolls a dice with n sides\n&eval <p> - evaluates p problem (Disabled)\n&blable <m> - sends m msg\n&info - displays my portfolio carrd.co.")
+        case s if s.startswith('&blable '):
+            await msg.channel.send(msg.content[7::])
+        case s if s.startswith('&ask '):
+            if choice([True, False]):
+                await msg.channel.send('Yes')
+            else:
+                await msg.channel.send('No')
+        case s if s.startswith('&dice '):
+            try:
+                await msg.channel.send(str(randint(1, int(msg.content[5::]))))
+            except:
+                await msg.channel.send('Failed to roll the dice! Did you put a proper value?')
+        case s if s.startswith('&eval'):
+            if '9+10' in msg.content or '9 + 10' in msg.content:
+                await msg.channel.send('21')
+                return
+            print('Eval function was called')
+            await msg.channel.send('Eval func is disabled due to security reasons!')
+        case '&info':
+            await msg.channel.send(f'Rowan bot ver {version}. Author carrd: https://vladzodchey.carrd.co/')
+
+client.run(token)
