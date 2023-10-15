@@ -1,7 +1,6 @@
-# Rowan bot by VladZodchey
-
 import discord
 import configparser
+from numexpr import evaluate as evalu
 from random import randint, choice
 
 config = configparser.ConfigParser()
@@ -40,8 +39,11 @@ async def on_message(msg):
             if '9+10' in msg.content or '9 + 10' in msg.content:
                 await msg.channel.send('21')
                 return
-            print('Eval function was called')
-            await msg.channel.send('Eval func is disabled due to security reasons!')
+            try:
+                await msg.channel.send(evalu(msg.content[6::]))
+            except:
+                await msg.channel.send('Failed to solve problem')
+            
         case '&info':
             await msg.channel.send(f'Rowan bot ver {version}. Author carrd: https://vladzodchey.carrd.co/')
 
