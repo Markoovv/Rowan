@@ -4,7 +4,7 @@ Rowan adds features such as:
 - Solving math
 - Rolling a dice
 - Flipping a coin
-- Playing number guesser with you
+- Copying you
 
 ## Install manual
 1. Download the main.py file and defaultconfig.ini file.
