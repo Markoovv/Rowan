@@ -19,7 +19,7 @@ async def on_ready():
 async def on_message(msg):
     if msg.author == client.user:
         return
-    if any(word in msg.content.lower() for word in cursewords):
+    if any(word in msg.content.lower() for word in cursewords.split(',')):
         await msg.delete()
     match msg.content:
         case '&help':
