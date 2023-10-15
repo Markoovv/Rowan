@@ -5,6 +5,7 @@ Rowan adds features such as:
 - Rolling a dice
 - Flipping a coin
 - Copying you
+- Filtering swear words
 
 ## Install manual
 1. Download the main.py file and defaultconfig.ini file.
