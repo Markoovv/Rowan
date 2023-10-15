@@ -5,11 +5,12 @@ import configparser
 from random import randint, choice
 
 config = configparser.ConfigParser()
-config.read('config.ini')
+config.read('config.ini', encoding='utf-8')
 client = discord.Client(intents=discord.Intents.all(), options=8)
 
 token = config['Prefs']['token']
 version = config['Prefs']['version']
+cursewords = config['Prefs']['cursewords']
 
 @client.event
 async def on_ready():
@@ -18,6 +19,8 @@ async def on_ready():
 async def on_message(msg):
     if msg.author == client.user:
         return
+    if any(word in msg.content.lower() for word in cursewords):
+        await msg.delete()
     match msg.content:
         case '&help':
             await msg.channel.send("Here's a list of implemented commands:\n&help - Displays this msg\n&ask <q> - gives you yes/no answer for q question\n&dice <n> - rolls a dice with n sides\n&eval <p> - evaluates p problem (Disabled)\n&blable <m> - sends m msg\n&info - displays my portfolio carrd.co.")
