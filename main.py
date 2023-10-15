@@ -22,7 +22,7 @@ async def on_message(msg):
         await msg.delete()
     match msg.content:
         case '&help':
-            await msg.channel.send("Here's a list of implemented commands:\n&help - Displays this msg\n&ask <q> - gives you yes/no answer for q question\n&dice <n> - rolls a dice with n sides\n&eval <p> - evaluates p problem (Disabled)\n&blable <m> - sends m msg\n&info - displays my portfolio carrd.co.")
+            await msg.channel.send("Here's a list of implemented commands:\n&help - Displays this msg\n&ask <q> - gives you yes/no answer for q question\n&dice <n> - rolls a dice with n sides\n&eval <p> - evaluates p problem\n&blable <m> - sends m msg\n&info - displays my portfolio carrd.co.")
         case s if s.startswith('&blable '):
             await msg.channel.send(msg.content[7::])
         case s if s.startswith('&ask '):
