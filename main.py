@@ -1,66 +1,67 @@
 # Rowan bot by VladZodchey
 
 import discord
+from discord.ext import commands
 import configparser
-from numexpr import evaluate as evalu
-from random import randint, choice
+from numexpr import evaluate
+from random import choice, randint
 
 config = configparser.ConfigParser()
 config.read('config.ini', encoding='utf-8')
-client = discord.Client(intents=discord.Intents.all(), options=8)
 
-token = config['Prefs']['token']
-version = config['Prefs']['version']
+token = config['Info']['token']
+version = config['Info']['version']
+
 cursewords = config['Prefs']['cursewords'].split(',')
 votes = config['Prefs']['votes'].split(',')
 cheers = config['Prefs']['phrases'].split(',')
 
-@client.event
-async def on_ready():
-    print('Login success {0.user}'.format(client))
-@client.event
-async def on_message(msg):
-    if msg.author == client.user:
-        return
-    if any(word in msg.content.lower() for word in cursewords):
-        await msg.delete()
-    match msg.content:
-        case '&help':
-            await msg.channel.send("Here's a list of implemented commands:\n&help - Displays this msg\n&ask <q> - gives you yes/no answer for q question\n&dice <n> - rolls a dice with n sides\n&eval <p> - evaluates p problem (Disabled)\n&blable <m> - sends m msg\n&info - displays my portfolio carrd.co\n&poll <a/yesno> <c> - automatically adds reactions to your message. <a> - Adds 1-9 digit emojis; <yesno> - Adds checkmark/cross emojis\n&cheer - Sends you a cheer message!")
-        case s if s.startswith('&blable '):
-            await msg.channel.send(msg.content[7::])
-        case s if s.startswith('&ask '):
-            if choice([True, False]):
-                await msg.channel.send('Yes')
-            else:
-                await msg.channel.send('No')
-        case s if s.startswith('&dice '):
-            try:
-                await msg.channel.send(str(randint(1, int(msg.content[5::]))))
-            except:
-                await msg.channel.send('Failed to roll the dice! Did you put a proper value?')
-        case s if s.startswith('&eval'):
-            if '9+10' in msg.content or '9 + 10' in msg.content:
-                await msg.channel.send('21')
-                return
-            try:
-                await msg.channel.send(evalu(msg.content[6::]))
-            except:
-                await msg.channel.send('Failed to solve problem')
-        case s if s.startswith('&poll'):
-            if msg.content[6:11] == 'yesno':
-                await msg.add_reaction('\U00002714')
-                await msg.add_reaction('\U0000274C')
-            else:
-                try:
-                    for a in range(int(msg.content[6:7])):
-                        await msg.add_reaction(votes[a])
-                except:
-                    await msg.channel.send('Failed to register poll!')
-        case '&cheer':
-            await msg.channel.send(cheers[randint(0,len(cheers))])
-        
-        case '&info':
-            await msg.channel.send(f'Rowan bot ver {version}. Author carrd: https://vladzodchey.carrd.co/')
+bot = commands.Bot(command_prefix='&', intents=discord.Intents.all())
 
-client.run(token)
+@bot.event
+async def on_ready():
+    print('Logged in as {0.user}'.format(bot))
+
+@bot.hybrid_command()
+async def blable(ctx, *, arg):
+    await ctx.send(arg)
+@bot.hybrid_command()
+async def info(ctx):
+    await ctx.send(f'Rowan ver {version}. Author: https://vladzodchey.carrd.co')
+@bot.hybrid_command()
+async def ask(ctx):
+    if choice([True,False]):
+        await ctx.send('Yes')
+    else:
+        await ctx.send('No')
+@bot.hybrid_command()
+async def dice(ctx, arg):
+    try:
+        await ctx.send(str(randint(1, int(arg))))
+    except:
+        await ctx.send('Failed to roll the dice!')
+@bot.hybrid_command()
+async def eval(ctx, *, arg):
+    try:
+        await ctx.send(evaluate(arg))
+    except:
+        await ctx.send('Failed to solve problem!')
+@bot.hybrid_command()
+async def poll(ctx, arg):
+    if arg == 'yesno' or arg == 'данет':
+        await ctx.message.add_reaction(votes[0])
+        await ctx.message.add_reaction(votes[1])
+    else:
+        try:
+            for a in int(arg):
+                await ctx.message.add_reaction(votes[a+2])
+        except:
+            await ctx.send('Failed to create poll!')
+@bot.hybrid_command()
+async def cheer(ctx):
+    await ctx.send(cheers[randint(0,len(cheers))])
+@bot.hybrid_command(name='rowan_help')
+async def help(ctx):
+    await ctx.send(f"Rowan bot's prefix is {bot.command_prefix}. List of commands:\n- help - displays this message.\n- info - shows bot info.\n- blable <m> - copies <m> message.\n- ask <q>- gives you yes/no answer to <q> question.\n- dice <a> - rolls a dice with <a> sides.\n- poll <a> <p> - adds <a> digit reactions to your message (max 9). enter yesno to make it a yes/no poll.\n- cheer - cheers you.\n- eval <p> - will try to solve <p> problem.")
+
+bot.run(token)
