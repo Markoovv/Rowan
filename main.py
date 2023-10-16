@@ -13,6 +13,7 @@ token = config['Prefs']['token']
 version = config['Prefs']['version']
 cursewords = config['Prefs']['cursewords'].split(',')
 votes = config['Prefs']['votes'].split(',')
+cheers = config['Prefs']['phrases'].split(',')
 
 @client.event
 async def on_ready():
@@ -25,7 +26,7 @@ async def on_message(msg):
         await msg.delete()
     match msg.content:
         case '&help':
-            await msg.channel.send("Here's a list of implemented commands:\n&help - Displays this msg\n&ask <q> - gives you yes/no answer for q question\n&dice <n> - rolls a dice with n sides\n&eval <p> - evaluates p problem (Disabled)\n&blable <m> - sends m msg\n&info - displays my portfolio carrd.co.")
+            await msg.channel.send("Here's a list of implemented commands:\n&help - Displays this msg\n&ask <q> - gives you yes/no answer for q question\n&dice <n> - rolls a dice with n sides\n&eval <p> - evaluates p problem (Disabled)\n&blable <m> - sends m msg\n&info - displays my portfolio carrd.co\n&poll <a/yesno> <c> - automatically adds reactions to your message. <a> - Adds 1-9 digit emojis; <yesno> - Adds checkmark/cross emojis\n&cheer - Sends you a cheer message!")
         case s if s.startswith('&blable '):
             await msg.channel.send(msg.content[7::])
         case s if s.startswith('&ask '):
@@ -56,7 +57,9 @@ async def on_message(msg):
                         await msg.add_reaction(votes[a])
                 except:
                     await msg.channel.send('Failed to register poll!')
-                
+        case '&cheer':
+            await msg.channel.send(cheers[randint(0,len(cheers))])
+        
         case '&info':
             await msg.channel.send(f'Rowan bot ver {version}. Author carrd: https://vladzodchey.carrd.co/')
 
