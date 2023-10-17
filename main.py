@@ -14,7 +14,6 @@ version = config['Info']['version']
 
 cursewords = config['Prefs']['cursewords'].split(',')
 votes = config['Prefs']['votes'].split(',')
-cheers = config['Prefs']['phrases'].split(',')
 
 bot = commands.Bot(command_prefix='&', intents=discord.Intents.all())
 
@@ -57,9 +56,6 @@ async def poll(ctx, arg):
                 await ctx.message.add_reaction(votes[i+2])
         except:
             await ctx.send('Failed to create poll!')
-@bot.hybrid_command()
-async def cheer(ctx):
-    await ctx.send(cheers[randint(0,len(cheers))])
 @bot.hybrid_command(name='rowan_help')
 async def help(ctx):
     await ctx.send(f"Rowan bot's prefix is {bot.command_prefix}. List of commands:\n- help - displays this message.\n- info - shows bot info.\n- blable <m> - copies <m> message.\n- ask <q>- gives you yes/no answer to <q> question.\n- dice <a> - rolls a dice with <a> sides.\n- poll <a> <p> - adds <a> digit reactions to your message (max 9). enter yesno to make it a yes/no poll.\n- cheer - cheers you.\n- eval <p> - will try to solve <p> problem.")
