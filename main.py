@@ -53,8 +53,8 @@ async def poll(ctx, arg):
         await ctx.message.add_reaction(votes[1])
     else:
         try:
-            for a in int(arg):
-                await ctx.message.add_reaction(votes[a+2])
+            for i in range(int(arg)):
+                await ctx.message.add_reaction(votes[i+2])
         except:
             await ctx.send('Failed to create poll!')
 @bot.hybrid_command()
