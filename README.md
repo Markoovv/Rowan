@@ -7,6 +7,8 @@ Rowan adds features such as:
 - Copying you
 - Filtering swear words
 - Creating polls
+- Playing number guesser with you
+- Purging messages
 
 ## Install manual
 1. Download the main.py file and defaultconfig.ini file.
