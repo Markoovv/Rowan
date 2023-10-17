@@ -6,6 +6,7 @@ Rowan adds features such as:
 - Flipping a coin
 - Copying you
 - Filtering swear words
+- Creating polls
 
 ## Install manual
 1. Download the main.py file and defaultconfig.ini file.
