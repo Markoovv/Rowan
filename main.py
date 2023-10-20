@@ -20,6 +20,10 @@ bot = commands.Bot(command_prefix='&', intents=discord.Intents.all())
 @bot.event
 async def on_ready():
     print('Logged in as {0.user}'.format(bot))
+@bot.event
+async def on_member_join(ctx):
+    await ctx.send(f"Welcome to {ctx.guild.name}. I hope you enjoy your stay.")    
+
 
 @bot.command()
 async def blable(ctx, *, arg):
