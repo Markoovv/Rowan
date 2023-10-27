@@ -57,7 +57,7 @@ async def info(ctx):
 @bot.command()
 async def purge(ctx, arg):
     await ctx.channel.purge(limit=arg)
-@bot.command
+@bot.command()
 async def guess(ctx):
     num = randint(1, 20)
     await ctx.send('I guessed a number from 1 to 20. You have 4 tries and 20 seconds.')
