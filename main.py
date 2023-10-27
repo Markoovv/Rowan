@@ -1,10 +1,11 @@
 import discord
-from discord import app_commands
+# from discord import app_commands
 from discord.ext import commands  # DiscordLang
 from random import randint, choice
 from numexpr import evaluate
 import asyncio
 import configparser
+import sqlite3
 
 config = configparser.ConfigParser()
 config.read('config.ini', encoding='utf-8')
@@ -12,6 +13,12 @@ config.read('config.ini', encoding='utf-8')
 token = config['INFO']['token']
 version = config['INFO']['version']
 
+eng = config['PREFS']['eng_lang'].split('|')
+rus = config['PREFS']['rus_lang'].split('|')
+emoji = config['PREFS']['emoji'].split(',')
+
+base = sqlite3.connect('base.db')
+cur = base.cursor()
 
 bot = commands.Bot(command_prefix='&', intents=discord.Intents.all())
 
@@ -71,5 +78,16 @@ async def guess(ctx):
         else:
             await ctx.send('My number is higher!')
     await ctx.send(f'You ran out of tries! My number was {num}')
+@bot.command()
+async def poll(ctx, arg):
+    if arg == 'yesno' or arg == 'данет':
+        await ctx.message.add_reaction(emoji[0])
+        await ctx.message.add_reaction(emoji[1])
+    else:
+        try:
+            for i in range(int(arg)):
+                await ctx.message.add_reaction(emoji[i+2])
+        except:
+            await ctx.send('Failed to create poll!')
 
 bot.run(token)
