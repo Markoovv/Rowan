@@ -5,6 +5,7 @@ from discord.ext import commands
 import configparser
 from numexpr import evaluate
 from random import choice, randint
+import asyncio
 
 config = configparser.ConfigParser()
 config.read('config.ini', encoding='utf-8')
