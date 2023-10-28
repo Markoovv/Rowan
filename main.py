@@ -75,8 +75,8 @@ async def rhelp(ctx):
     await ctx.send(f"Rowan bot's prefix is {bot.command_prefix}. List of commands:\n- rhelp - displays this message.\n- info - shows bot info.\n- blable <m> - copies <m> message.\n- ask <q>- gives you yes/no answer to <q> question.\n- dice <a> - rolls a dice with <a> sides.\n- poll <a> <p> - adds <a> digit reactions to your message (max 9). enter yesno to make it a yes/no poll.\n- eval <p> - will try to solve <p> problem.\n- purge <a> - purges <a> amount of messages in chat. Requires manage messages permission!\n- guess - starts a number guesser game.\n- zen - prints famous 'Python Zen'")
 @bot.command()
 async def guess(ctx):
-    num = randint(1,15)
-    await ctx.send(f'I am thinking of a number from 1 to 20. You have 4 tries and 15 seconds.')
+    num = randint(1,20)
+    await ctx.send(f'I am thinking of a number from 1 to 20. You have 4 tries and 20 seconds.')
     def check(m):
         return m.author == ctx.author and m.channel == ctx.channel and m.content.isdigit()
 
