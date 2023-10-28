@@ -1,12 +1,18 @@
-# ROWAN
-Rowan is a discord bot written in python that I made in two weeks and continue to develop.
-# This bot can:
-- Solve arithmetical problems
-- Roll a dice
-- Flip a coin
-- Create a poll
-- Play number guesser with you
-- Copy your messages
-- Purge chats
-# Why this repo is so dirty?
-This bot is currently experiences rewriting. Once I am satisfied with the new result I will clean it up and make a new, 0.5 release.
+# Rowan
+Rowan is a small QoL bot I made out of curiosity.
+Rowan adds features such as:
+- Solving math
+- Rolling a dice
+- Flipping a coin
+- Copying you
+- Filtering swear words
+- Creating polls
+- Playing number guesser with you
+- Purging messages
+
+## Install manual
+1. Download the main.py file and defaultconfig.ini file.
+2. Place them inside one folder.
+3. Rename defaultconfig.ini to config.ini or change configparser path in main.py to 'defaultconfig.ini'
+4. Replace 'insert your token here' line in config.ini file to your application token.
+Profit!
