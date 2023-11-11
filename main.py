@@ -73,7 +73,7 @@ async def zen(ctx):
     await ctx.send("Beautiful is better than ugly.\nExplicit is better than implicit.\nSimple is better than complex.\nComplex is better than complicated.\nFlat is better than nested.\nSparse is better than dense.\nReadability counts.\nSpecial cases aren't special enough to break the rules.\nAlthough practicality beats purity.\nErrors should never pass silently.\nUnless explicitly silenced.\nIn the face of ambiguity, refuse the temptation to guess.\nThere should be one-- and preferably only one --obvious way to do it.\nAlthough that way may not be obvious at first unless you're Dutch.\nNow is better than never.\nAlthough never is often better than *right* now.\nIf the implementation is hard to explain, it's a bad idea.\nIf the implementation is easy to explain, it may be a good idea.\nNamespaces are one honking great idea -- let's do more of those!")
 @bot.command()
 async def rhelp(ctx):
-    await ctx.send(f"Rowan bot's prefix is {bot.command_prefix}. List of commands:\n- rhelp - displays this message.\n- info - shows bot info.\n- blable <m> - copies <m> message.\n- ask <q>- gives you yes/no answer to <q> question.\n- dice <a> - rolls a dice with <a> sides.\n- poll <a> <p> - adds <a> digit reactions to your message (max 9). enter yesno to make it a yes/no poll.\n- eval <p> - will try to solve <p> problem.\n- purge <a> - purges <a> amount of messages in chat. Requires manage messages permission!\n- guess - starts a number guesser game.\n- zen - prints famous 'Python Zen'")
+    await ctx.send(f"Rowan bot's prefix is {bot.command_prefix}. List of commands:\n- rhelp - displays this message.\n- info - shows bot info.\n- blable <m> - copies <m> message.\n- ask <q>- gives you yes/no answer to <q> question.\n- dice <a> - rolls a dice with <a> sides.\n- poll <a> <p> - adds <a> digit reactions to your message (max 9). enter yesno to make it a yes/no poll.\n- eval <p> - will try to solve <p> problem.\n- purge <a> - purges <a> amount of messages in chat. Requires manage messages permission!\n- guess - starts a number guesser game.\n- zen - prints famous 'Python Zen'\n- math - plays 'math blitz'")
 @bot.command()
 async def guess(ctx):
     num = randint(1,20)
@@ -94,6 +94,24 @@ async def guess(ctx):
             await ctx.send('My number is higher!')
         else:
             await ctx.send('My number is lower!')
-    await ctx.send(f"You ran out of tries. My number was {num}")
+    await ctx.send(f"You ran out of tries. My number was {num}.")
+@bot.command()
+async def math(ctx):
+    expr = str(randint(-100, 100)) + choice(['+', '-']) + str(randint(-100, 100))
+    res = evaluate(expr)
+    await ctx.send(f'Solve {expr} in 20 seconds.')
+    def check(m):
+        return m.author == ctx.author and m.channel == ctx.channel and m.content.lstrip('-').isdigit()
+    try:
+        msg = await bot.wait_for('message', check=check, timeout=20.0)
+    except:
+        return await ctx.send(f"Time's up! The answer is {res}.")
+    guess = int(msg.content)
+    if guess == res:
+        await ctx.send(f"That's right! The answer is {res}.")
+        return
+    else:
+        await ctx.send(f"That's wrong! The answer is {res}.")
+        return
 
 bot.run(token)
