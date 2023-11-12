@@ -1,0 +1,11 @@
+Rowan Bot currently supports these commands:
+- rhelp - Prints this message
+- blable - Copies what you wrote after command
+- dice <n> - Rolls a dice with <n> sides
+- coin - Flips a coin
+- zen - Prints out "The Zen of Python"
+- purge <n> - Purges <n> messages in the chat (Requires manage messages perm!)
+- guess - Starts a number guesser game
+- math - Starts a math blitz game
+- eval <p> - Evaluates your math problem (Equations not supported)
+- poll <yesno/a> - Adds poll reactions to your message. <yesno> - Adds checkmark / x emoji. <a> - Adds <a> digits 1-9. 

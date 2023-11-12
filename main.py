@@ -15,6 +15,8 @@ version = config['Info']['version']
 
 cursewords = config['Prefs']['cursewords'].split(',')
 votes = config['Prefs']['votes'].split(',')
+comms = open('help.txt', 'r')
+pythonzen = open('zen.txt', 'r')
 
 bot = commands.Bot(command_prefix='&', intents=discord.Intents.all())
 
@@ -70,10 +72,10 @@ async def purge(ctx, arg:int):
         await ctx.send('Failed to purge the chat!')
 @bot.command()
 async def zen(ctx):
-    await ctx.send("Beautiful is better than ugly.\nExplicit is better than implicit.\nSimple is better than complex.\nComplex is better than complicated.\nFlat is better than nested.\nSparse is better than dense.\nReadability counts.\nSpecial cases aren't special enough to break the rules.\nAlthough practicality beats purity.\nErrors should never pass silently.\nUnless explicitly silenced.\nIn the face of ambiguity, refuse the temptation to guess.\nThere should be one-- and preferably only one --obvious way to do it.\nAlthough that way may not be obvious at first unless you're Dutch.\nNow is better than never.\nAlthough never is often better than *right* now.\nIf the implementation is hard to explain, it's a bad idea.\nIf the implementation is easy to explain, it may be a good idea.\nNamespaces are one honking great idea -- let's do more of those!")
+    await ctx.send(pythonzen.read())
 @bot.command()
 async def rhelp(ctx):
-    await ctx.send(f"Rowan bot's prefix is {bot.command_prefix}. List of commands:\n- rhelp - displays this message.\n- info - shows bot info.\n- blable <m> - copies <m> message.\n- ask <q>- gives you yes/no answer to <q> question.\n- dice <a> - rolls a dice with <a> sides.\n- poll <a> <p> - adds <a> digit reactions to your message (max 9). enter yesno to make it a yes/no poll.\n- eval <p> - will try to solve <p> problem.\n- purge <a> - purges <a> amount of messages in chat. Requires manage messages permission!\n- guess - starts a number guesser game.\n- zen - prints famous 'Python Zen'\n- math - plays 'math blitz'")
+    await ctx.send(comms.read())
 @bot.command()
 async def guess(ctx):
     num = randint(1,20)
