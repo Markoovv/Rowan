@@ -31,6 +31,7 @@ async def on_member_join(ctx):
 @bot.command()
 async def blable(ctx, *, arg):
     await ctx.send(arg)
+    await ctx.message.delete()
 @bot.command()
 async def info(ctx):
     await ctx.send(f'Rowan ver {version}. Author: https://vladzodchey.carrd.co')
