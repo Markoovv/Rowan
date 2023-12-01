@@ -13,7 +13,6 @@ config.read('config.ini', encoding='utf-8')
 token = config['Info']['token']
 version = config['Info']['version']
 
-cursewords = config['Prefs']['cursewords'].split(',')
 votes = config['Prefs']['votes'].split(',')
 comms = open('help.txt', 'r')
 pythonzen = open('zen.txt', 'r')
