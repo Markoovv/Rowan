@@ -1,11 +1,10 @@
 # Rowan bot by VladZodchey
 
-import discord
+import discord, asyncio, configparser
 from discord.ext import commands
-import configparser
 from numexpr import evaluate
 from random import choice, randint
-import asyncio
+from time import sleep
 
 config = configparser.ConfigParser()
 config.read('config.ini', encoding='utf-8')
@@ -61,6 +60,7 @@ async def poll(ctx, arg):
         try:
             for i in range(int(arg)):
                 await ctx.message.add_reaction(votes[i+2])
+                sleep(0.02)
         except:
             await ctx.send('Failed to create poll!')
 @commands.has_permissions(manage_messages=True)
