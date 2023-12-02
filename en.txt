@@ -1,0 +1,18 @@
+Welcome to {ctx.guild.name}. I hope you enjoy your stay.
+Rowan ver {version}. Author: https://vladzodchey.carrd.co .
+Heads
+Tails
+Failed to roll the dice!
+Failed to solve problem!
+Failed to create the poll!
+Failed to purge the chat!
+I am thinking of a number from 1 to 20. You have 4 tries and 20 seconds.
+Time's up! I guessed {num}.
+You won! The number was indeed {num}!
+My number is higher!
+My number is lower!
+You ran out of tries. My number was {num}.
+Solve {expr} in 20 seconds.
+Time's up! Answer was {res}.
+Wrong! The answer was {res}.
+You were right! The answer was {res}.
