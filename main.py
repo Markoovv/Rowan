@@ -34,11 +34,11 @@ async def blable(ctx, *, arg):
 async def info(ctx):
     await ctx.send(f'Rowan ver {version}. Author: https://vladzodchey.carrd.co')
 @bot.command()
-async def ask(ctx):
+async def coin(ctx):
     if choice([True,False]):
-        await ctx.send('Yes')
+        await ctx.send('Heads')
     else:
-        await ctx.send('No')
+        await ctx.send('Tails')
 @bot.command()
 async def dice(ctx, arg):
     try:
@@ -79,7 +79,7 @@ async def rhelp(ctx):
 @bot.command()
 async def guess(ctx):
     num = randint(1,20)
-    await ctx.send(f'I am thinking of a number from 1 to 20. You have 4 tries and 20 seconds.')
+    await ctx.send('I am thinking of a number from 1 to 20. You have 4 tries and 20 seconds.')
     def check(m):
         return m.author == ctx.author and m.channel == ctx.channel and m.content.isdigit()
 
