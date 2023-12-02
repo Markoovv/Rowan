@@ -1,18 +1,25 @@
 # Rowan
-Rowan is a small QoL bot I made out of curiosity.
-Rowan adds features such as:
-- Solving math
-- Rolling a dice
-- Flipping a coin
-- Copying you
-- Filtering swear words
-- Creating polls
-- Playing number guesser with you
-- Purging messages
+Rowan (Рябина) это небольшой дискорд-бот которого я написал на discord.py.
+Рябина может:
+- Решать арифметику
+- Кидать кубик
+- Подбрасывать монетку
+- Повторять ваши слова
+- Создавать голосования
+- Играть в "угадай число" и "реши пример" с вами
+- Чистить сообщения
+- Цитировать "Дзен Пайтон"
 
-## Install manual
-1. Download the main.py file and defaultconfig.ini file.
-2. Place them inside one folder.
-3. Rename defaultconfig.ini to config.ini or change configparser path in main.py to 'defaultconfig.ini'
-4. Replace 'insert your token here' line in config.ini file to your application token.
-Profit!
+## Зависимости
+Для корректной работы Рябины нужны следующие библиотеки:
+- discord
+- asyncio
+- numexpr
+- configparser
+
+## Руководство к установке
+1. Скачайте main.py файл и defaultconfig.ini
+2. Переименуйте defaultconfig.ini => config.ini
+3. Замените "your token goes here" и "your version goes here" на токен своего приложения и версию вашего форка
+
+Бот должен заработать при запуске. Если в консоль написалось "Logged in as [ваш бот]", то всё исправно.
