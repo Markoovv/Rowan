@@ -17,6 +17,7 @@ comms = open('help.txt', 'r')
 pythonzen = open('zen.txt', 'r')
 
 bot = commands.Bot(command_prefix='&', intents=discord.Intents.all())
+bot.remove_command('help')
 
 @bot.event
 async def on_ready():
@@ -74,7 +75,7 @@ async def purge(ctx, arg:int):
 async def zen(ctx):
     await ctx.send(pythonzen.read())
 @bot.command()
-async def rhelp(ctx):
+async def help(ctx):
     await ctx.send(comms.read())
 @bot.command()
 async def guess(ctx):
