@@ -1,0 +1,24 @@
+Welcome to {ctx.guild.name}. I hope you enjoy your stay. 0
+Rowan ver {version}. Author: https://vladzodchey.carrd.co . 1
+Heads. 2
+Tails. 3
+Failed to roll the dice! 4
+Failed to solve problem! 5
+Failed to create the poll! 6
+Failed to purge the chat, maybe you don't have enough perms? 7
+I am thinking of a number from 1 to 20. You have 4 tries and 20 seconds. 8
+Time's up! I guessed {num}. 9
+You won! The number was indeed {num}! 10
+My number is higher! 11
+My number is lower! 12
+You ran out of tries. My number was {num}. 13
+Solve {expr} in 20 seconds. 14
+Time's up! Answer was {res}. 15
+Wrong! The answer was {res}. 16
+You were right! The answer was {res}. 17
+Failed to set the language, maybe you don't have enough perms? 18
+Failed to register server, maybe you don't have enough perms? 19
+Already registered. 20
+Register success. 21
+Language is not recognized! Supported langs: russian, english. 22
+Total executed commands on this guild is {0} 23

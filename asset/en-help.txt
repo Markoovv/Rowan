@@ -1,5 +1,7 @@
 Rowan Bot currently supports these commands:
-- rhelp - Prints this message
+- help - Prints this message
+- register - Registers your server in the database (Requires admin perm!)
+- lang <l> - Sets your language to <l> (Supported: english, russian) (Requires admin perm!)
 - blable - Copies what you wrote after command
 - dice <n> - Rolls a dice with <n> sides
 - coin - Flips a coin
@@ -9,3 +11,4 @@ Rowan Bot currently supports these commands:
 - math - Starts a math blitz game
 - eval <p> - Evaluates your math problem (Equations not supported)
 - poll <yesno/a> - Adds poll reactions to your message. <yesno> - Adds checkmark / x emoji. <a> - Adds <a> digits 1-9. 
+- count - Shows the count of all executed commands on the server
