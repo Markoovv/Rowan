@@ -11,3 +11,4 @@ Rowan Bot currently supports these commands:
 - math - Starts a math blitz game
 - eval <p> - Evaluates your math problem (Equations not supported)
 - poll <yesno/a> - Adds poll reactions to your message. <yesno> - Adds checkmark / x emoji. <a> - Adds <a> digits 1-9. 
+- count - Shows the count of all executed commands on the server
