@@ -1,5 +1,7 @@
 Rowan Bot currently supports these commands:
-- rhelp - Prints this message
+- help - Prints this message
+- register - Registers your server in the database (Requires admin perm!)
+- lang <l> - Sets your language to <l> (Supported: english, russian) (Requires admin perm!)
 - blable - Copies what you wrote after command
 - dice <n> - Rolls a dice with <n> sides
 - coin - Flips a coin
