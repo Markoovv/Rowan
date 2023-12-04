@@ -132,6 +132,7 @@ async def dice(ctx, arg):
 @bot.command()
 async def eval(ctx, *, arg):
     try:
+        arg.replace('^', '**')
         await ctx.send(evaluate(arg)) 
     except:
         await ctx.send(get_lang(ctx.guild.id, 5)) # Не удалось решить пример
