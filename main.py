@@ -1,7 +1,5 @@
 # Rowan bot by VladZodchey
 
-# Андрей, напиши мне, я всю архитектуру поясню
-
 import asyncio, discord, configparser, sqlite3
 from discord.ext import commands
 from numexpr import evaluate
