@@ -13,9 +13,9 @@ token = config['Info']['token']
 version = config['Info']['version']
 
 votes = config['Prefs']['votes'].split(',')
-en_comms = open('asset/en-help.txt', 'r')
-ru_comms = open('asset/ru-help.txt', 'r', encoding='utf-8')
-pythonzen = open('asset/zen.txt', 'r')
+en_comms = open('asset/en-help.txt', 'r').read()
+ru_comms = open('asset/ru-help.txt', 'r', encoding='utf-8').read()
+pythonzen = open('asset/zen.txt', 'r').read()
 
 base = sqlite3.connect('../../Databases/rowan.db')
 c = base.cursor()
@@ -160,17 +160,17 @@ async def purge(ctx, arg:int):
         await ctx.send(get_lang(ctx.guild.id, 7)) # Недостаточно прав
 @bot.command()
 async def zen(ctx):
-    await ctx.send(pythonzen.read()) # Зен пайтон
+    await ctx.send(pythonzen) # Зен пайтон
     incrementate(ctx.guild.id)
 @bot.command()
 async def help(ctx):
     c.execute('SELECT language FROM Preferences WHERE guild = ?', (int(ctx.guild.id),))
     res = c.fetchone()
     if res[0] == 0:
-        await ctx.send(en_comms.read()) # Команды на английском
+        await ctx.send(en_comms) # Команды на английском
         incrementate(ctx.guild.id)
     elif res[0] == 1:
-        await ctx.send(ru_comms.read()) # Команды на русском
+        await ctx.send(ru_comms) # Команды на русском
         incrementate(ctx.guild.id)
     else:
         await ctx.send('Your guild is not registered. Please register using &register') # Гильдия не зарегистрирована
@@ -214,10 +214,6 @@ async def math(ctx): # Игра на решение арифметики
     else:
         await ctx.send(get_lang(ctx.guild.id, 16).format(res)) # Неправильное решение
         return
-@bot.command()
-async def test(ctx, arg : int):
-    await ctx.send(get_lang(ctx.guild.id, arg,))
-    incrementate(ctx.guild.id)
 @bot.command()
 async def count(ctx):
     c.execute('SELECT executed_comms FROM Preferences WHERE guild = ?', (int(ctx.guild.id),))
