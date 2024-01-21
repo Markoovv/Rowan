@@ -1,227 +1,186 @@
 # Rowan bot by VladZodchey
 
-import asyncio, discord, configparser, sqlite3
+import discord, configparser, json, os, re, sqlite3, typing
 from discord.ext import commands
-from numexpr import evaluate
 from random import choice, randint
-from time import sleep
+from sympy import solve, symbols, sympify
+from numexpr import evaluate
+
+base = sqlite3.connect("../../Databases/rowan.db")
+c = base.cursor()
 
 config = configparser.ConfigParser()
 config.read('config.ini', encoding='utf-8')
 
-token = config['Info']['token']
+token = config['Info']['betatoken']
 version = config['Info']['version']
 
-votes = config['Prefs']['votes'].split(',')
-en_comms = open('asset/en-help.txt', 'r').read()
-ru_comms = open('asset/ru-help.txt', 'r', encoding='utf-8').read()
-pythonzen = open('asset/zen.txt', 'r').read()
+languages = {}
 
-base = sqlite3.connect('../../Databases/rowan.db')
-c = base.cursor()
+for path in os.listdir("languages"):
+    if os.path.splitext(os.path.basename(path))[1]:
+        languages[os.path.splitext(os.path.basename(path))[0]] = json.load(open("languages/" + path, mode="r", encoding="utf"))
 
-ru = open('asset/ru.txt', 'r', encoding='utf-8').read().splitlines()
-en = open('asset/en.txt', 'r').read().splitlines()
+def prefix(bot, ctx):
+    c.execute("SELECT prefix FROM guilds WHERE gid = ?", (ctx.guild.id,))
+    try:
+        return c.fetchone()[0]
+    except:
+        return "$"
 
-bot = commands.Bot(command_prefix='&', intents=discord.Intents.all())
+bot = commands.Bot(command_prefix=prefix, intents=discord.Intents.all())
 bot.remove_command('help')
 
-def get_lang(guild_id : int, phrase):
-    c.execute('SELECT language FROM Preferences WHERE guild = ?', (guild_id,))
-    res = c.fetchone()
-    if res[0] == 0:
-        if phrase <= len(en): 
-            return en[phrase]
-        else:
-            return 'Phrase id outside of phrase pack' # Фраза не найдена
-    elif res[0] == 1:
-        if phrase <= len(ru):
-            return ru[phrase]
-        else:
-            return 'Айди фразы вне пака фраз' # Фраза не найдена
-    else:
-        return 'Queried guild not found. Please register using &register' # Сервер не найден
-def incrementate(guild_id : int):
-    c.execute('SELECT executed_comms FROM Preferences WHERE guild = ?', (guild_id,))
-    res = c.fetchone()
-    if res:
-        add = res[0] + 1
-        c.execute('UPDATE Preferences SET executed_comms = ? WHERE guild = ?', (add, guild_id,))
-        base.commit()
-@commands.has_permissions(administrator=True)
-@bot.command()              
-async def register(ctx):
-    try:
-        c.execute('SELECT * FROM Guilds WHERE guild_id = ?', (ctx.guild.id,))
-        if c.fetchone():
-            await ctx.send(get_lang(ctx.guild.id, 20)) # Уже зарегестрирован
-        else:
-            try:
-                c.execute('INSERT INTO Guilds (guild_id, prefix)VALUES (?, ?)', (ctx.guild.id, '&',))
-                base.commit()
-                c.execute('INSERT INTO Preferences (language, guild, executed_comms) VALUES (?, ?, ?)', (0, ctx.guild.id, 0,))
-                base.commit()
-                await ctx.send(get_lang(ctx.guild.id, 21)) # Успех
-            except Exception as e:
-                await ctx.send(get_lang(ctx.guild.id, 23).format(e)) # Ошибка
-    except:
-        await ctx.send(get_lang(ctx.guild.id, 19)) # Недостаточно прав
-@commands.has_permissions(administrator=True)
-@bot.command()
-async def lang(ctx, arg):
-    try:
-        c.execute('SELECT * FROM Guilds WHERE guild_id = ?', (ctx.guild.id,))
-        res = c.fetchone()
-        if res:
-            if arg == 'english':
-                c.execute('UPDATE Preferences SET language = ? WHERE guild = ?', (0, ctx.guild.id,))
-                base.commit()
-                await ctx.send('Succesfully set language to english') # Язык сменён на английский
-            elif arg == 'russian':
-                c.execute('UPDATE Preferences SET language = ? WHERE guild = ?', (1, ctx.guild.id,))
-                base.commit()
-                await ctx.send('Язык успешно сменён на русский') # Язык сменён на русский
-            else:
-                await ctx.send(get_lang(ctx.guild.id, 22)) # Язык не распознан
-        else:
-            await ctx.send('Your server is not registered. Please register using &register.') # Гильдия не зарегистрирована
-    except:
-        await ctx.send(get_lang(ctx.guild.id, 18))
 @bot.event
 async def on_ready():
-    print('Logged in as {0.user}'.format(bot))
+    print("Started up as {0.user}".format(bot))
+          
+def lang(guild):
+    c.execute("SELECT language FROM guilds WHERE gid = ?", (guild,))
+    try:
+        return languages[c.fetchone()[0]]
+    except:
+        return languages["en"]
+
+'''@bot.event
+async def on_message(ctx):
+    if ctx.author == bot.user:
+        return
+    c.execute("SELECT voteid FROM guilds WHERE gid = ?", (ctx.guild.id,))
+    vid = c.fetchone()
+    if vid:
+        vid = vid[0].split(",")
+    if ctx.channel.id in vid:
+        c.execute("SELECT votemoji FROM guilds WHERE gid = ?", (ctx.guild.id,))
+        vmoji = c.fetchone()
+        if vmoji:
+            vmoji = vmoji[0].split(",")
+            for emoji in vmoji:
+                try:
+                    await ctx.add_reaction(emoji)
+                except:
+                    pass'''
+    
+
 @bot.event
 async def on_member_join(ctx):
-    await ctx.send(get_lang(ctx.guild.id, 0).format(ctx.guild.id)) # Добро пожаловать
+    c.execute("SELECT welcome FROM guilds WHERE gid = ?", (ctx.guild.id,))
+    welcome = c.fetchone()
+    if welcome:
+        ctx.send(welcome[0].format(ctx.guild.name, ctx.guild.id, ctx.member.mention))
 @bot.event
 async def on_guild_join(ctx):
-    c.execute('SELECT * FROM Guilds WHERE guild_id = ?', (ctx.guild.id,))
+    c.execute("SELECT * FROM guilds WHERE gid = ?", (ctx.id,))
     if c.fetchone():
-        pass
+        c.execute('''UPDATE guilds
+SET oid = ?,
+auid = NULL,
+arid = NULL,
+premium = 0,
+language = 'en',
+updates = NULL,
+caps = 0,
+url = 0,
+swear = NULL,
+enabled = 1,
+guesstime = 20,
+guessrange = 20,
+guesstries = 4,
+mathtime = 20,
+mathrange = 100,
+mathops = '+-',
+ecid = NULL,
+erid = NULL,
+count = 0,
+welcome = NULL,
+prefix = &,
+voteid = NULL,
+votemoji = 0,
+chancemoji = 0
+WHERE gid = ?''', (ctx.id()))
     else:
-        try:
-            c.execute('INSERT INTO Guilds (guild_id, prefix)VALUES (?, ?)', (ctx.guild.id, '&',))
-            base.commit()
-            c.execute('INSERT INTO Preferences (language, guild, executed_comms) VALUES (?, ?, ?)', (0, ctx.guild.id, 0,))
-            base.commit()
-            print(f'Joining guild {ctx.id}:{ctx.name}, register success')
-        except Exception as e:
-            print(f'Joining guild {ctx.id}:{ctx.name}, experiencing a problem: {e}')
+        c.execute('''INSERT INTO guilds
+(gid, oid, auid, arid, premium, language, updates, caps, url, swear, enabled, guesstime, guessrange, guesstries, mathtime, mathrange, mathops, ecid, erid, count, welcome, prefix, voteid, votemoji, chancemoji)
+VALUES (?, ?, NULL, NULL, 0 ?, NULL, 0, 0, NULL, 1, 20, 20, 4, 20, 100, '+-', NULL, NULL, 0, NULL, '&', NULL, NULL, 0)''', (ctx.id, ctx.owner.id, "en"))
+@bot.command()
+async def foo(ctx):
+    await ctx.reply(lang(ctx.guild.id)["phrases"]["hello"])
+
+@bot.command()
+async def prefix(ctx, arg):
+    try:
+        if len(arg) > 32:
+            raise TypeError("Too long!")
+        c.execute("UPDATE guilds SET prefix = ? WHERE gid = ?", (arg, ctx.guild.id,))
+        base.commit()
+        await ctx.reply(lang(ctx.guild.id)["phrases"]["prefix_success"].format(arg))
+    except:
+        await ctx.reply(lang(ctx.guild.id)["phrases"]["prefix_fail"])
+@bot.command()
+async def language(ctx, arg):
+    if arg in languages.keys():
+        c.execute("UPDATE guilds SET language = ? WHERE gid = ?", (arg, ctx.guild.id,))
+        base.commit()
+        await ctx.send(languages[arg]["phrases"]["lang_success"])
+    else:
+        await ctx.send(lang(ctx.guild.id)["phrases"]["lang_fail"])
+
+
 @bot.command()
 async def blable(ctx, * , arg):
+    # if not swearcheck(ctx):
     await ctx.send(arg)
-    incrementate(ctx.guild.id)
 @bot.command()
-async def info(ctx):
-    await ctx.send(get_lang(ctx.guild.id, 1).format(version)) # Инфо о рябине и создателе
-    incrementate(ctx.guild.id)
-@bot.command()
-async def coin(ctx):
-    if choice([True, False]):
-        await ctx.send(get_lang(ctx.guild.id, 2)) # Орёл
-    else:
-        await ctx.send(get_lang(ctx.guild.id, 3)) # Решка
-    incrementate(ctx.guild.id)
-@bot.command()
-async def dice(ctx, arg):
-    try:
-        await ctx.send(str(randint(1, int(arg))))
-    except:
-        await ctx.send(get_lang(ctx.guild.id, 4)) # Не удалось кинуть кубик
-    incrementate(ctx.guild.id)
-@bot.command()
-async def eval(ctx, *, arg):
-    try:
-        arg = arg.replace('^', '**')
-        await ctx.send(evaluate(arg)) 
-    except:
-        await ctx.send(get_lang(ctx.guild.id, 5)) # Не удалось решить пример
-    incrementate(ctx.guild.id)
-@bot.command()
-async def poll(ctx, arg):
-    if arg == 'yesno' or arg == 'данет':
-        await ctx.message.add_reaction(votes[0])
-        await ctx.message.add_reaction(votes[1])
-        incrementate(ctx.guild.id)
-    else:
-        try:
-            for i in range(int(arg)):
-                await ctx.message.add_reaction(votes[i+2])
-                sleep(0.02)
-                incrementate(ctx.guild.id)
-        except:
-            await ctx.send(get_lang(ctx.guild.id, 6)) # Не удалось создать опрос
+async def zen(ctx):
+    await ctx.send(lang(ctx.guild.id)["zen"])
 @commands.has_permissions(manage_messages=True)
 @bot.command()
 async def purge(ctx, arg:int):
     try:
         await ctx.channel.purge(limit=arg)
-        incrementate(ctx.guild.id)
     except:
-        await ctx.send(get_lang(ctx.guild.id, 7)) # Недостаточно прав
+        await ctx.send(lang(ctx.guild.id)["phrases"]["purge_fail"])
 @bot.command()
-async def zen(ctx):
-    await ctx.send(pythonzen) # Зен пайтон
-    incrementate(ctx.guild.id)
+async def help(ctx, arg:typing.Optional[str] = "all"):
+    match arg:
+            case "all":
+                await ctx.send(lang(ctx.guild.id)["help"]["all"])
+            case "help":
+                await ctx.send(lang(ctx.guild.id)["help"]["help"])
+            case _:
+                await ctx.send(lang(ctx.guild.id)["help"]["not_found"])
 @bot.command()
-async def help(ctx):
-    c.execute('SELECT language FROM Preferences WHERE guild = ?', (int(ctx.guild.id),))
-    res = c.fetchone()
-    if res[0] == 0:
-        await ctx.send(en_comms) # Команды на английском
-        incrementate(ctx.guild.id)
-    elif res[0] == 1:
-        await ctx.send(ru_comms) # Команды на русском
-        incrementate(ctx.guild.id)
+async def coin(ctx):
+    if choice([True, False]):
+        await ctx.send(lang(ctx.guild.id)["phrases"]["heads"])
     else:
-        await ctx.send('Your guild is not registered. Please register using &register') # Гильдия не зарегистрирована
+        await ctx.send(lang(ctx.guild.id)["phrases"]["tails"])
 @bot.command()
-async def guess(ctx): # Игра на "угадай число"
-    num = randint(1,20)
-    await ctx.send(get_lang(ctx.guild.id, 8)) # Первоначальный ответ
-    def check(m):
-        return m.author == ctx.author and m.channel == ctx.channel and m.content.isdigit()
-    incrementate(ctx.guild.id)
-    for i in range(4):
-        try:
-            msg = await bot.wait_for('message', check=check, timeout=20.0)
-        except asyncio.TimeoutError:
-            return await ctx.send(get_lang(ctx.guild.id, 9).format(num)) # Закончилось время
-        guess = int(msg.content)
-        if guess == num:
-            await ctx.send(get_lang(ctx.guild.id, 10).format(num)) # Верно угадано
-            return
-        elif guess < num:
-            await ctx.send(get_lang(ctx.guild.id, 11)) # Число больше введённого
-        else:
-            await ctx.send(get_lang(ctx.guild.id, 12)) # Число меньше введённого
-    await ctx.send(get_lang(ctx.guild.id, 13).format(num)) # Закончились попытки
-@bot.command()
-async def math(ctx): # Игра на решение арифметики
-    expr = str(randint(-100, 100)) + choice(['+', '-']) + str(randint(-100, 100))
-    res = evaluate(expr)
-    await ctx.send(get_lang(ctx.guild.id, 14).format(expr)) # Первоначальный запрос
-    def check(m):
-        return m.author == ctx.author and m.channel == ctx.channel and m.content.lstrip('-').isdigit()
-    incrementate(ctx.guild.id)
+async def dice(ctx, arg:typing.Optional[int] = 6):
     try:
-        msg = await bot.wait_for('message', check=check, timeout=20.0)
-    except asyncio.TimeoutError:
-        return await ctx.send(get_lang(ctx.guild.id, 15).format(res)) # Закончилось время
-    guess = int(msg.content)
-    if guess == res:
-        await ctx.send(get_lang(ctx.guild.id, 17).format(res)) # Правильное решение
-        return
-    else:
-        await ctx.send(get_lang(ctx.guild.id, 16).format(res)) # Неправильное решение
-        return
+        await ctx.send(randint(1, arg))
+    except:
+        await ctx.send(lang(ctx.guild.id)["phrases"]["dice_fail"])
 @bot.command()
-async def count(ctx):
-    c.execute('SELECT executed_comms FROM Preferences WHERE guild = ?', (int(ctx.guild.id),))
-    res = c.fetchone()
-    if res:
-        await ctx.send(get_lang(ctx.guild.id, 23).format(res[0]))
-    else:
-        await ctx.send('Your server is not registered and so, executed commands are not counted. Register using &register')
+async def info(ctx):
+    c.execute("SELECT count FROM guilds WHERE gid = ?", (ctx.guild.id,))
+    count = c.fetchone()
+    if count:
+        await ctx.send(lang(ctx.guild.id)["phrases"]["info"].format(version, count[0]))
+@bot.command()
+async def eval(ctx, *, arg):
+    try:
+        await ctx.send(str(evaluate(arg)))
+    except:
+        try:
+            expr = sympify("Eq(" + arg.replace("=", ",") + ")")
+            await ctx.send(str(solve(expr)))
+        except:
+            await ctx.send(lang(ctx.guild.id)["phrases"]["eval_fail"])
         
+
+@bot.command()
+async def quit(ctx):
+    exit()
+
 bot.run(token)

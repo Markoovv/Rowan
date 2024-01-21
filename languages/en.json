@@ -1,0 +1,43 @@
+{
+    "phrases" : {
+        "welcome" : "Welcome to {0}, I hope you enjoy your stay",
+        "hello" : "Hello, World!",
+        "lang_success" : "Language is successfully switched to English",
+        "lang_fail" : "Language not recognized!",
+        "dice_fail" : "Failed to roll the dice!",
+        "heads" : "Heads!",
+        "tails" : "Tails!",
+        "guess_start" : "I guessed a number between 1 and {0}. Guess it in {1} seconds.",
+        "guess_bigger" : "My number is bigger!",
+        "guess_smaller" : "My number is smaller!",
+        "guess_fail_time" : "You ran out of time. My number was {0}.",
+        "guess_fail_tries" : "You ran out of tries. My number was {0}.",
+        "guess_win" : "You won. My number was indeed {0}.",
+        "poll_fail" : "Failed to create a poll!",
+        "math_start" : "Solve {0} in {1} seconds.",
+        "math_fail_time" : "Time's out! The answer was {0}.",
+        "math_fail_tries" : "You're wrong. The answer was {0}.",
+        "math_win" : "Correct. The answer was {0}",
+        "count" : "The amount of executed commands is {0}",
+        "prefix_success" : "Successfully changed my prefix to {0} on this guild.",
+        "prefix_fail" : "Failed to set the prefix! Maybe your prefix is longer than 32 characters?",
+        "info" : "Rowan Bot ver. {0}. Amount of executed commands on this server: {1}.",
+        "eval_fail" : "Failed to solve expression!"
+    },
+    "help" : {
+        "all": "the help command",
+        "help" : "Help - shows list of all commands. Help <a> - description of command <a>.",
+        "not_found" : "No such command found."
+    },
+    "aphorism" : {
+        "top" : [
+            "You are not the same",
+            "Working is hard"
+        ],
+        "bottom" : [
+            "when you are alone",
+            "when you are hungry"
+        ]
+    },
+    "zen" : "insert Zen of Python here"
+}
