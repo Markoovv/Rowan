@@ -1,6 +1,6 @@
 # Rowan bot by VladZodchey
 
-import discord, configparser, json, os, re, sqlite3, typing
+import discord, json, os, re, sqlite3, typing
 from discord.ext import commands
 from random import choice, randint
 from sympy import solve, symbols, sympify
@@ -9,11 +9,11 @@ from numexpr import evaluate
 base = sqlite3.connect("../../Databases/rowan.db")
 c = base.cursor()
 
-config = configparser.ConfigParser()
-config.read('config.ini', encoding='utf-8')
+config = json.load(open("config.json"))
 
-token = config['Info']['betatoken']
-version = config['Info']['version']
+token = config["token"]
+version = config["version"]
+sign = config["assembly"]
 
 languages = {}
 
