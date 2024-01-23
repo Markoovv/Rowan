@@ -177,8 +177,11 @@ async def eval(ctx, *, arg):
             solution = ""
             for i in solve(expr):
                 solution += f"{i}, "
-            await ctx.send(solution[:-2])
-        except Exception as e:
-            await ctx.send(lang(ctx.guild.id)["phrases"]["eval_fail"]")
+            if solution:
+                await ctx.send(solution[:-2])
+            else:
+                await ctx.send(lang(ctx.guild.id)["phrases"]["eval_zero"])
+        except:
+            await ctx.send(lang(ctx.guild.id)["phrases"]["eval_fail"])
         
 bot.run(token)
