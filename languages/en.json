@@ -22,7 +22,8 @@
         "prefix_success" : "Successfully changed my prefix to {0} on this guild.",
         "prefix_fail" : "Failed to set the prefix! Maybe your prefix is longer than 32 characters?",
         "info" : "Rowan Bot ver. {0}. Amount of executed commands on this server: {1}.",
-        "eval_fail" : "Failed to solve expression!"
+        "eval_fail" : "Failed to solve expression!",
+        "eval_zero" : "0 solutions."
     },
     "help" : {
         "all": "the help command",
