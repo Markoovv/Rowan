@@ -169,6 +169,7 @@ async def info(ctx):
         await ctx.send(lang(ctx.guild.id)["phrases"]["info"].format(version, count[0]))
 @bot.command()
 async def eval(ctx, *, arg):
+    arg = arg.replace("^", "**")
     try:
         await ctx.send(str(evaluate(arg)))
     except:
@@ -178,6 +179,8 @@ async def eval(ctx, *, arg):
             for i in solve(expr):
                 solution += f"{i}, "
             if solution:
+                solution = solution.replace("**", "^")
+                solution = solution.replace("*", "×")
                 await ctx.send(solution[:-2])
             else:
                 await ctx.send(lang(ctx.guild.id)["phrases"]["eval_zero"])
