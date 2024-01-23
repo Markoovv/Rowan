@@ -191,22 +191,13 @@ async def guess(ctx):
     c.execute("SELECT guesstime, guessrange, guesstries FROM guilds WHERE gid = ?", (ctx.guild.id,))
     response = c.fetchone()
     if response:
-        if response[0]:
-            time = response[0]
-        else:
-            time = 10
-        if response[1]:
-            rang = response[1]
-        else:
-            rang = 20
-        if response[2]:
-            tris = response[2]
-        else:
-            tris = 4
-    else:
-        time = 10
-        rang = 20
-        tris = 4
+        if response[0]: time = response[0]
+        else: time = 10
+        if response[1]: rang = response[1]
+        else: rang = 20
+        if response[2]: tris = response[2]
+        else: tris = 4
+    else: time = 10; rang = 20; tris = 4
     num = randint(1, rang)
     await ctx.send(lang(ctx.guild.id)["phrases"]["guess_start"].format(rang, time, tris))
     def check(msg):
