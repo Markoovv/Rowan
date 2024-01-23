@@ -67,7 +67,7 @@ async def on_member_join(ctx):
     c.execute("SELECT welcome FROM guilds WHERE gid = ?", (ctx.guild.id,))
     welcome = c.fetchone()
     if welcome:
-        ctx.send(welcome[0].format(ctx.guild.name, ctx.guild.id, ctx.member.mention))
+        await ctx.send(welcome[0].format(ctx.guild.name, ctx.guild.id, ctx.mention))
 @bot.event
 async def on_guild_join(ctx):
     c.execute("SELECT * FROM guilds WHERE gid = ?", (ctx.id,))
@@ -174,13 +174,11 @@ async def eval(ctx, *, arg):
     except:
         try:
             expr = sympify("Eq(" + arg.replace("=", ",") + ")")
-            await ctx.send(str(solve(expr)))
-        except:
-            await ctx.send(lang(ctx.guild.id)["phrases"]["eval_fail"])
+            solution = ""
+            for i in solve(expr):
+                solution += f"{i}, "
+            await ctx.send(solution[:-2])
+        except Exception as e:
+            await ctx.send(lang(ctx.guild.id)["phrases"]["eval_fail"] + f"({e})")
         
-
-@bot.command()
-async def quit(ctx):
-    exit()
-
 bot.run(token)
