@@ -7,7 +7,7 @@
         "dice_fail" : "Failed to roll the dice!",
         "heads" : "Heads!",
         "tails" : "Tails!",
-        "guess_start" : "I guessed a number between 1 and {0}. Guess it in {1} seconds.",
+        "guess_start" : "I guessed a number between 1 and {0}. Guess it in {1} seconds and {2} tries.",
         "guess_bigger" : "My number is bigger!",
         "guess_smaller" : "My number is smaller!",
         "guess_fail_time" : "You ran out of time. My number was {0}.",
