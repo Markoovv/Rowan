@@ -140,13 +140,10 @@ async def purge(ctx, arg:int):
         await ctx.send(lang(ctx)["phrases"]["purge_fail"])
 @bot.command()
 async def help(ctx, arg:typing.Optional[str] = "all"):
-    match arg:
-            case "all":
-                await ctx.send(lang(ctx)["help"]["all"])
-            case "help":
-                await ctx.send(lang(ctx)["help"]["help"])
-            case _:
-                await ctx.send(lang(ctx)["help"]["not_found"])
+    if arg in lang(ctx)["help"]:
+        await ctx.send(lang(ctx)["help"][arg])
+    else:
+        await ctx.send(lang(ctx)["help"]["not_found"])
 @bot.command()
 async def coin(ctx):
     if choice([True, False]):
