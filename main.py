@@ -237,7 +237,8 @@ async def math(ctx):
             time = 10
             rang = 100
             oper = "+-"
-    expr = str(randint(rang * -1, rang)) + choice(oper) + str(randint(rang * -1, rang))
+    neg = lambda x: "({})".format(x) if x < 0 else str(x)
+    expr = str(randint(rang * -1, rang)) + choice(oper) + str(neg(randint(rang * -1, rang))) #str(randint(rang * -1, rang))
     num = round(float(evaluate(expr)), 2)
     await ctx.send(lang(ctx)["phrases"]["math_start"].format(expr, time))
     def check(msg): 
