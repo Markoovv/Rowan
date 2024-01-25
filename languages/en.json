@@ -21,7 +21,7 @@
         "math_win" : "Correct. The answer was {0}",
         "count" : "The amount of executed commands is {0}",
         "prefix_success" : "Successfully changed my prefix to {0} on this guild.",
-        "prefix_fail" : "Failed to set the prefix! Maybe your prefix is longer than 32 characters?",
+        "prefix_fail" : "Failed to set the prefix! Maybe your prefix is longer than 32 characters or you are setting it in DMs?",
         "info" : "Rowan Bot ver. {0}. Amount of executed commands on this server: {1}.",
         "info_fail" : "Failed to load info.",
         "eval_fail" : "Failed to solve expression!",
