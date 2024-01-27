@@ -51,32 +51,33 @@ def lang(ctx):
             return languages[c.fetchone()[0]]
         except:
             return languages["en"]
-def swearcheck(ctx):
-    c.execute("SELECT swear FROM guilds WHERE gid = ?", (ctx.guild.id,))
-    swears = c.fetchone()
+def swearcheck(ctx, dat):
+    swears = dat
     if swears:
-        swearlist = swears[0].split(",")
+        swearlist = swears.split(",")
         if any(swear in ctx.content.lower() for swear in swearlist):
             return True
         else:
             return False
     else:
         return False
-def capscheck(ctx):
-    c.execute("SELECT caps FROM guilds WHERE gid = ?", (ctx.guild.id,))
-    response = c.fetchone()
-    if response:
-        threshold = response[0]
-        if threshold != 0:
+def capscheck(ctx, dat):
+    #print((ctx.author.name, ctx.guild.name, ctx.content))
+    if dat:
+        if dat != 0:
+            z = lambda x : x + 1 if x == 0 else x
             alph = list(filter(str.isalpha, ctx.content))
-            if sum(map(str.isupper, alph)) / len(alph) >= threshold * 0.01:
-                return True
+            if sum(map(str.isupper, alph)) / len(z(alph)) >= dat * 0.01: return True
             return False
         else: return False
     else: return False
-def linkcheck(ctx):
+def linkcheck(ctx, dat):
     return False
-    #c.execute("SELECT ")
+    '''if dat:
+        links = re.findall(r"/((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/", ctx.content)
+        if links: return True
+        else: return False
+    else: return False'''
 @bot.event
 async def on_message(ctx):
     if ctx.author == bot.user:
@@ -84,10 +85,12 @@ async def on_message(ctx):
     if is_direct(ctx):
         await bot.process_commands(ctx)
     else:
-        if swearcheck(ctx) or capscheck(ctx) or linkcheck(ctx):
-            try:
+        c.execute("SELECT swear, caps, url FROM guilds WHERE gid = ?", (ctx.guild.id,))
+        response = c.fetchone()
+        if response:
+            if swearcheck(ctx, response[0]) or capscheck(ctx, response[1]) or linkcheck(ctx, response[2]):
                 await ctx.delete()
-            except:
+            else:
                 await bot.process_commands(ctx)
         else:
             await bot.process_commands(ctx)
@@ -267,7 +270,7 @@ async def math(ctx):
 @commands.guild_only()
 @bot.command()
 async def configure(ctx, comm=None, value1=None, value2=None):
-    print(comm, value1, value2)
+    #print(comm, value1, value2)
     match comm:
         case "caps":
             try:
@@ -406,10 +409,39 @@ async def configure(ctx, comm=None, value1=None, value2=None):
             else:
                 c.execute("SELECT welcome FROM guilds WHERE gid = ?", (ctx.guild.id,))
                 response = c.fetchone()
-                if response:
+                if response != None:
                     await ctx.send(response[0])
                 else:
                     await ctx.send(lang(ctx)["phrases"]["welcome_null"])
+        case "filter":
+            match value1:
+                case "url":
+                    try:
+                        if int(value2) == 1 or int(value2) == 0:
+                            c.execute("UPDATE guilds SET url = ? WHERE gid = ?", (value2, ctx.guild.id,))
+                            base.commit()
+                            await ctx.send(lang(ctx)["phrases"]["configure_success"].format(value1, value2))
+                        else:
+                            raise ValueError
+                    except ValueError:
+                        await ctx.send(lang(ctx)["phrases"]["configure_fail_bool"])
+                    except sqlite3.DatabaseError:
+                        await ctx.send(lang(ctx)["phrases"]["error_db"])
+                case "swear":
+                    c.execute("UPDATE guilds SET swear = ? WHERE gid = ?", (ctx.gui))
+                case "caps":
+                    try:
+                        value = int(value2)
+                        if value >= 0 and value <= 100:
+                            c.execute("UPDATE guilds SET caps = ? WHERE gid = ?", (value, ctx.guild.id,))
+                            base.commit()
+                            await ctx.send(lang(ctx)["phrases"]["configure_success"].format(value1, value2))
+                        else:
+                            raise ValueError
+                    except ValueError:
+                        await ctx.send(lang(ctx)["phrases"]["configure_fail_int"])
+                    except sqlite3.DatabaseError:
+                        await ctx.send(lang(ctx)["phrases"]["error_db"])
                 
                     
         case _:
