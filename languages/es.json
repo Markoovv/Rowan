@@ -1,7 +1,0 @@
-{
-    "phrases" : {
-        "welcome": "Bienvenido al {ctx.guild.name}",
-        "hello": "¡Hola Mundo!",
-        "test": "Esta es una prueba del sistema lingüístico."
-    }
-}
