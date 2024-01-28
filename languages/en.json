@@ -30,6 +30,10 @@
         "configure_fail_format" : "Your value is using an unknown format mention or exceeds allowed length.",
         "configure_fail_other" : "Your value is incorrect type or exceeds a certain limit. See <prefix>help command to see allowed values.",
         "configure_unknown" : "An uknown command or subtype.",
+        "configure_add" : "Added {1} to {0} successfully.",
+        "configure_remove" : "Removed {1} from {0} successfully.",
+        "configure_fail_notincluded" : "{0} is not included into {1}.",
+        "configure_fail_already" : "{0} is already included into {1}.",
         "kick_reason" : "User {0} was kicked by {1}{2}.",
         "ban_reason" : "User {0} was banned by {1}{2}.",
         "mute_reason" : "User {0} was timeouted for {1} by {1}{2}.",
@@ -37,16 +41,24 @@
         "error_specification" : "User is not specified!",
         "error_db" : "An unexpected database error happened. Perhaps your server is not registered.",
         "welcome_null" : "Greet message is not set.",
+        "caps" : "You caps filter is set to {0}%.",
         "error" : "An unexpected error occured.",
         "error_permissions_mine" : "I don't have needed permission(s) to do that.",
         "error_permissions_your" : "You don't have enough rights to do that.",
         "error_private" : "This is a guild-only command.",
-        "error_argument" : "Command's argument raised an exception."
+        "error_argument" : "Command's argument raised an exception.",
+        "register_success" : "Successfully registered this guild.",
+        "register_already" : "This guild is already registered.",
+        "configure_excluded" : "Excluded roles: {0}\nExcluded channels {1}"
     },
     "help" : {
         "all": "the help command",
         "help" : "Help - shows list of all commands. Help <a> - description of command <a>.",
         "not_found" : "No such command found."
+    },
+    "symbolica" : {
+        "poll" : ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"],
+        "emoji" : ["🍻","💀","🗣", "🔥", "😎", "😳", "😮"]
     },
     "zen" : "The Zen of Python, by Tim Peters\n\nBeautiful is better than ugly.\nExplicit is better than implicit.\nSimple is better than complex.\nComplex is better than complicated.\nFlat is better than nested.\nSparse is better than dense.\nReadability counts.\nSpecial cases aren't special enough to break the rules.\nAlthough practicality beats purity.\nErrors should never pass silently.\nUnless explicitly silenced.\nIn the face of ambiguity, refuse the temptation to guess.\nThere should be one-- and preferably only one --obvious way to do it.\nAlthough that way may not be obvious at first unless you're Dutch.\nNow is better than never.\nAlthough never is often better than *right* now.\nIf the implementation is hard to explain, it's a bad idea.\nIf the implementation is easy to explain, it may be a good idea.\nNamespaces are one honking great idea -- let's do more of those!"
 }
