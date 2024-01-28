@@ -65,9 +65,9 @@ def capscheck(ctx, dat):
     #print((ctx.author.name, ctx.guild.name, ctx.content))
     if dat:
         if dat != 0:
-            z = lambda x : x + 1 if x == 0 else x
+            z = lambda x: x + 1 if x == 0 else abs(x)
             alph = list(filter(str.isalpha, ctx.content))
-            if sum(map(str.isupper, alph)) / len(z(alph)) >= dat * 0.01: return True
+            if sum(map(str.isupper, alph)) / z(len(alph)) >= int(dat) * 0.01: return True
             return False
         else: return False
     else: return False
@@ -85,13 +85,31 @@ async def on_message(ctx):
     if is_direct(ctx):
         await bot.process_commands(ctx)
     else:
-        c.execute("SELECT swear, caps, url FROM guilds WHERE gid = ?", (ctx.guild.id,))
+        c.execute("SELECT swear, caps, url, erid, ecid, chancemoji FROM guilds WHERE gid = ?", (ctx.guild.id,))
         response = c.fetchone()
         if response:
-            if swearcheck(ctx, response[0]) or capscheck(ctx, response[1]) or linkcheck(ctx, response[2]):
-                await ctx.delete()
+            if response[3]:
+                erid = response[3].split(",")
             else:
+                erid = []
+            if response[4]:
+                ecid = response[4].split(",")
+            else:
+                ecid = []
+            if (ctx.channel.id in ecid) or any(role.id in erid for role in ctx.author.roles):
                 await bot.process_commands(ctx)
+            else:
+                #print(response[1])
+                if swearcheck(ctx, response[0]) or capscheck(ctx, response[1]) or linkcheck(ctx, response[2]):
+                    await ctx.delete()
+                else:
+                    if randint(1, 100) <= int(response[5]):
+                        try:
+                            await ctx.add_reaction(choice(languages["en"]["symbolica"]["emoji"] + ctx.guild.emojis))
+                        except commands.Forbidden:
+                            pass
+                    await bot.process_commands(ctx)
+
         else:
             await bot.process_commands(ctx)
     
@@ -246,7 +264,7 @@ async def math(ctx):
             time = 10
             rang = 100
             oper = "+-"
-    neg = lambda x: "({})".format(x) if x < 0 else str(x)
+    neg = lambda x: "({})".format(x) if x < 0 else str(x) # Лямбда-функция, или статическая функция
     expr = str(randint(rang * -1, rang)) + choice(oper) + str(neg(randint(rang * -1, rang))) #str(randint(rang * -1, rang))
     num = round(float(evaluate(expr)), 2)
     await ctx.send(lang(ctx)["phrases"]["math_start"].format(expr, time))
@@ -269,7 +287,7 @@ async def math(ctx):
 @commands.has_permissions(manage_guild=True)
 @commands.guild_only()
 @bot.command()
-async def configure(ctx, comm=None, value1=None, value2=None):
+async def configure(ctx, comm=None, value1=None, value2 : typing.Union[discord.Role, discord.TextChannel, str] = None):
     #print(comm, value1, value2)
     match comm:
         case "caps":
@@ -428,22 +446,155 @@ async def configure(ctx, comm=None, value1=None, value2=None):
                     except sqlite3.DatabaseError:
                         await ctx.send(lang(ctx)["phrases"]["error_db"])
                 case "swear":
-                    c.execute("UPDATE guilds SET swear = ? WHERE gid = ?", (ctx.gui))
-                case "caps":
                     try:
-                        value = int(value2)
-                        if value >= 0 and value <= 100:
-                            c.execute("UPDATE guilds SET caps = ? WHERE gid = ?", (value, ctx.guild.id,))
+                        c.execute("UPDATE guilds SET swear = ? WHERE gid = ?", (value2.lower(), ctx.guild.id,))
+                        base.commit()
+                        await ctx.send(lang(ctx)["phrases"]["configure_success"].format(f"{comm}-{value1}", f'"{value2}"'))
+                    except sqlite3.DatabaseError:
+                        await ctx.send(lang(ctx)["phrases"]["error_db"])
+                case "caps":
+                    if value2:
+                        try:
+                            value = int(value2)
+                            if value >= 0 and value <= 100:
+                                c.execute("UPDATE guilds SET caps = ? WHERE gid = ?", (value, ctx.guild.id,))
+                                base.commit()
+                                await ctx.send(lang(ctx)["phrases"]["configure_success"].format(value1, value2))
+                            else:
+                                raise ValueError
+                        except ValueError:
+                            await ctx.send(lang(ctx)["phrases"]["configure_fail_int"])
+                        except sqlite3.DatabaseError:
+                            await ctx.send(lang(ctx)["phrases"]["error_db"])
+                    else:
+                        c.execute("SELECT caps FROM guilds WHERE gid = ?", (ctx.guild.id,))
+                        response = c.fetchone()
+                        if response:
+                            await ctx.send(lang(ctx)["phrases"]["caps"].format(response[0]))
+                        else:
+                            await ctx.send(lang(ctx)["phrases"]["error_db"])
+                case _:
+                    await ctx.send(lang(ctx)["phrases"]["configure_unknown"])
+        case "exclude":
+            match value1:
+                case "add":
+                    if type(value2) == discord.TextChannel:
+                        c.execute("SELECT ecid FROM guilds WHERE gid = ?", (ctx.guild.id,))
+                        response = c.fetchone()
+                        if response[0] != None:
+                            if str(value2.id) in response[0].split(","):
+                                await ctx.send(lang(ctx)["phrases"]["configure_fail_already"].format(f"<#{value2.id}>", f"{comm}-{value1}"))
+                                return
+                        new_filter = str(response[0] or '') + f"{value2.id},"
+                        c.execute("UPDATE guilds SET ecid = ? WHERE gid = ?", (new_filter, ctx.guild.id,))
+                        base.commit()
+                        await ctx.send(lang(ctx)["phrases"]["configure_add"].format(f"{comm}-{value1}", f"<#{value2.id}>"))
+                    elif type(value2) == discord.Role:
+                        c.execute("SELECT erid FROM guilds WHERE gid = ?", (ctx.guild.id,))
+                        response = c.fetchone()
+                        if response[0] != None:
+                            if str(value2.id) in response[0].split(","):
+                                await ctx.send(lang(ctx)["phrases"]["configure_fail_already"].format(f"<@&{value2.id}>", f"{comm}-{value1}"))
+                                return
+                        new_filter = str(response[0] or '') + f"{value2.id},"
+                        c.execute("UPDATE guilds SET erid = ? WHERE gid = ?", (new_filter, ctx.guild.id,))
+                        base.commit()
+                        await ctx.send(lang(ctx)["phrases"]["configure_add"].format(f"{comm}-{value1}", f"<@&{value2.id}>"))
+                    else:
+                        await ctx.send(lang(ctx)["phrases"]["configure_fail_other"])
+                case "remove":
+                    if type(value2) == discord.TextChannel:
+                        c.execute("SELECT ecid FROM guilds WHERE gid = ?", (ctx.guild.id,))
+                        response = c.fetchone()
+                        if response[0] != None:
+                            if str(value2.id) in response[0].split(","):
+                                new_filter = response[0].replace(f"{value2.id},", "")
+                            else:
+                                await ctx.send(lang(ctx)["phrases"]["configure_fail_notincluded"].format(f"<#{value2.id}>", str(comm)))
+                                return
+                        else:
+                            await ctx.send(lang(ctx)["phrases"]["configure_fail_notincluded"].format(f"<#{value2.id}>", str(comm)))
+                            return
+                        if new_filter == "":
+                            new_filter = None
+                        c.execute("UPDATE guilds SET ecid = ? WHERE gid = ?", (new_filter, ctx.guild.id,))
+                        base.commit()
+                        await ctx.send(lang(ctx)["phrases"]["configure_remove"].format(f"{comm}-{value1}", f"<#{value2.id}>"))
+                    elif type(value2) == discord.Role:
+                        c.execute("SELECT erid FROM guilds WHERE gid = ?", (ctx.guild.id,))
+                        response = c.fetchone()
+                        if response[0] != None:
+                            if str(value2.id) in response[0].split(","):
+                                new_filter = response[0].replace(f"{value2.id},", "")
+                            else:
+                                await ctx.send(lang(ctx)["phrases"]["configure_fail_notincluded"].format(f"<#{value2.id}>", str(comm)))
+                                return
+                        else:
+                            await ctx.send(lang(ctx)["phrases"]["configure_fail_notincluded"].format(f"<@&{value2.id}>", str(comm)))
+                            return
+                        if new_filter == "":
+                            new_filter = None
+                        c.execute("UPDATE guilds SET erid = ? WHERE gid = ?", (new_filter, ctx.guild.id,))
+                        base.commit()
+                        await ctx.send(lang(ctx)["phrases"]["configure_remove"].format(f"{comm}-{value1}", f"<@&{value2.id}>"))
+                    else:
+                        await ctx.send(lang(ctx)["phrases"]["configure_fail_other"])
+                case "reset":
+                    match value2:
+                        case "channels":
+                            try:
+                                c.execute("UPDATE guilds SET ecid = NULL WHERE gid = ?", (ctx.guild.id,))
+                                base.commit()
+                                await ctx.send(lang(ctx)["phrases"]["configure_success"].format(f"{comm}-{value2}", "None"))
+                            except sqlite3.DatabaseError:
+                                await ctx.send(lang(ctx)["phrases"]["error_db"])
+                        case "roles":
+                            try:
+                                c.execute("UPDATE guilds SET erid = NULL WHERE gid = ?", (ctx.guild.id,))
+                                base.commit()
+                                await ctx.send(lang(ctx)["phrases"]["configure_success"].format(f"{comm}-{value2}", "None"))
+                            except sqlite3.DatabaseError:
+                                await ctx.send(lang(ctx)["phrases"]["error_db"])
+                        case _:
+                            await ctx.send(lang(ctx)["phrases"]["configure_unknown"])
+                case None:
+                    c.execute("SELECT erid, ecid FROM guilds WHERE gid = ?", (ctx.guild.id,))
+                    response = c.fetchone()
+                    if response:
+                        rols = ""
+                        chans = ""
+                        if response[0] != None:
+                            for rol in response[0].split(",")[:-1]:
+                                rols += f"<@&{rol}>,"
+                        else:
+                            rols = "None"
+                        if response[1] != None:
+                            for chan in response[1].split(",")[:-1]:
+                                chans += f"<#{chan}>,"
+                        else:
+                            chans = "None"
+                        await ctx.send(lang(ctx)["phrases"]["configure_excluded"].format(rols, chans))
+                    else:
+                        await ctx.send(lang(ctx)["phrases"]["error_db"])
+                case _:
+                    await ctx.send(lang(ctx)["phrases"]["configure_unknown"])
+        case "fun":
+            match value1:
+                case "emoji":
+                    try:
+                        chance = int(value2)
+                        if chance >= 0 or chance <= 100:
+                            c.execute("UPDATE guilds SET chancemoji = ? WHERE gid = ?", (chance, ctx.guild.id,))
                             base.commit()
-                            await ctx.send(lang(ctx)["phrases"]["configure_success"].format(value1, value2))
+                            await ctx.send(lang(ctx)["phrases"]["configure_success"].format(value1, f"{chance}%"))
                         else:
                             raise ValueError
                     except ValueError:
                         await ctx.send(lang(ctx)["phrases"]["configure_fail_int"])
                     except sqlite3.DatabaseError:
-                        await ctx.send(lang(ctx)["phrases"]["error_db"])
-                
-                    
+                        await ctx.send(lang(ctx)["phrases"]["configure_fail_db"])
+                case _:
+                    await ctx.send(lang(ctx)["phrases"]["configure_unknown"])
         case _:
             await ctx.send(lang(ctx)["phrases"]["configure_unknown"])
 @commands.has_guild_permissions(kick_members=True)
@@ -483,6 +634,28 @@ async def mute(ctx, member : discord.Member, reason = None, days : int = 0, hour
 async def unmute(ctx, member : discord.Member):
     await member.timeout(None)
     await ctx.send(lang(ctx)["phrases"]["unmute_reason"].format(member.mention, ctx.author.mention)) 
+@commands.has_guild_permissions(manage_guild=True)
+@commands.guild_only()
+@bot.command()
+async def register(ctx):
+    c.execute("SELECT * FROM guilds WHERE gid = ?", (ctx.guild.id,))
+    if c.fetchone():
+        await ctx.send(lang(ctx)["phrases"]["register_already"])
+    else:
+        c.execute("INSERT INTO guilds(gid, oid, premium, language, caps, url, count, prefix, chancemoji) VALUES(?, ?, 0, 'en', 0, 0, 0, '&', 0)", (ctx.guild.id, ctx.guild.owner.id,))
+        base.commit()
+        await ctx.send(lang(ctx)["phrases"]["register_success"])
+@bot.command()
+async def poll(ctx, arg : int = 0):
+    if arg == 0:
+        await ctx.message.add_reaction("✔️")
+        await ctx.message.add_reaction("❌")
+    elif 2 <= arg <= 10:
+        for i in range(arg):
+            await ctx.message.add_reaction(languages["en"]["symbolica"]["poll"][i])
+    else:
+        await ctx.send(lang(ctx)["phrases"]["poll_fail"])
+        
 @bot.event
 async def on_command_error(ctx, error):
     match type(error):
