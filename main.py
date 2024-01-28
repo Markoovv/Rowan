@@ -22,14 +22,14 @@ for path in os.listdir("languages"):
     if os.path.splitext(os.path.basename(path))[1]:
         languages[os.path.splitext(os.path.basename(path))[0]] = json.load(open("languages/" + path, mode="r", encoding="utf"))
 
-def prefix(bot, ctx):
+def pref(bot, ctx):
     try:
         c.execute("SELECT prefix FROM guilds WHERE gid = ?", (ctx.guild.id,))
         return c.fetchone()[0]
     except:
         return "$"
 
-bot = commands.Bot(command_prefix=prefix, intents=discord.Intents.all())
+bot = commands.Bot(command_prefix=pref, intents=discord.Intents.all())
 bot.remove_command('help')
 
 debug = bot.get_channel(1201226108616573039) # Специфичный канал для вывода ошибок
@@ -80,12 +80,11 @@ def capscheck(ctx, dat):
         else: return False
     else: return False
 def linkcheck(ctx, dat):
-    return False
-    '''if dat:
-        links = re.findall(r"/((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/", ctx.content)
+    if dat:
+        links = re.findall(r"(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})", ctx.content)
         if links: return True
         else: return False
-    else: return False'''
+    else: return False
 @bot.event
 async def on_message(ctx):
     if ctx.author == bot.user:
@@ -154,11 +153,14 @@ async def prefix(ctx, arg):
         incrementate(ctx)
     except:
         await ctx.reply(lang(ctx)["phrases"]["prefix_fail"])
+@bot.command()
+async def foo(ctx):
+    await ctx.reply(lang(ctx)["phrases"]["hello"])
+    incrementate(ctx)
 @commands.has_guild_permissions(manage_guild=True)
 @commands.guild_only()
 @bot.command()
 async def language(ctx, arg):
-    await ctx.send(languages[arg]["phrases"]["lang_direct"])
     if arg in languages.keys():
         try:
             c.execute("UPDATE guilds SET language = ? WHERE gid = ?", (arg, ctx.guild.id,))
@@ -185,7 +187,7 @@ async def zen(ctx):
 async def purge(ctx, arg:int = 5):
     await ctx.channel.purge(limit=arg)
     incrementate(ctx)
-@commands.cooldown(1, 10, commands.BucketType.user)
+@commands.cooldown(1, 5, commands.BucketType.user)
 @bot.command()
 async def help(ctx, arg:typing.Optional[str] = "all"):
     if arg in lang(ctx)["help"]:
@@ -224,7 +226,7 @@ async def info(ctx):
             await ctx.send(lang(ctx)["phrases"]["info_fail"])
 @commands.cooldown(1, 3, commands.BucketType.user)
 @bot.command()
-async def eval(ctx, *, arg):
+async def eval(ctx, *, arg = "9+10"):
     arg = arg.replace("^", "**")
     try:
         await ctx.send(str(evaluate(arg)))
@@ -324,29 +326,6 @@ async def math(ctx):
 async def configure(ctx, comm=None, value1=None, value2 : typing.Union[discord.Role, discord.TextChannel, str] = None):
     #print(comm, value1, value2)
     match comm:
-        case "caps":
-            try:
-                value = int(value1)
-                if value <= 100 and value >= 0:
-                    c.execute("UPDATE guilds SET caps = ? WHERE gid = ?", (value, ctx.guild.id))
-                    base.commit()
-                else:
-                    raise ValueError
-            except sqlite3.DatabaseError:
-                await ctx.send(lang(ctx)["phrases"]["error_db"])
-            except ValueError:
-                await ctx.send(lang(ctx)["phrases"]["configure_fail_int"])
-        case "url":
-            try:
-                value = int(value1)
-                if value == 0 or value == 1:
-                    c.execute("UPDATE guilds SET url = ? WHERE gid = ?", (value, ctx.guild.id,))
-                else:
-                    raise ValueError
-            except sqlite3.DatabaseError:
-                await ctx.send(lang(ctx)["phrases"]["error_db"])
-            except ValueError:
-                await ctx.send(lang(ctx)["phrases"]["configure_fail_other"])
         case "math":
             match value1:
                 case "range":
