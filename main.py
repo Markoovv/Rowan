@@ -134,8 +134,9 @@ async def on_member_join(ctx):
 @bot.event
 async def on_guild_join(ctx):
     try:
-        c.execute("INSERT INTO guilds(gid, oid, premium, language, caps, url, count, prefix, chancemoji) VALUES(?, ?, 0, 'en', 0, 0, 0, '&', 0)", (ctx.id, ctx.guild.owner.id,))
-    except:
+        c.execute("INSERT INTO guilds(gid, oid, premium, language, caps, url, count, prefix, chancemoji) VALUES(?, ?, 0, 'en', 0, 0, 0, '&', 0)", (ctx.id, ctx.owner.id,))
+        base.commit()
+    except Exception as e:
         pass
 '''@bot.command()
 async def foo(ctx):
