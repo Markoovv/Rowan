@@ -84,6 +84,10 @@ async def on_message(ctx):
         return
     if is_direct(ctx):
         await bot.process_commands(ctx)
+    try:
+        ctx.author.roles
+    except:
+        return
     else:
         c.execute("SELECT swear, caps, url, erid, ecid, chancemoji FROM guilds WHERE gid = ?", (ctx.guild.id,))
         response = c.fetchone()
