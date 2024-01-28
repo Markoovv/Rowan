@@ -32,6 +32,8 @@ def prefix(bot, ctx):
 bot = commands.Bot(command_prefix=prefix, intents=discord.Intents.all())
 bot.remove_command('help')
 
+debug = bot.get_channel(1201226108616573039) # Специфичный канал для вывода ошибок
+
 @bot.event
 async def on_ready():
     print("Started up as {0.user}".format(bot))
@@ -51,6 +53,12 @@ def lang(ctx):
             return languages[c.fetchone()[0]]
         except:
             return languages["en"]
+
+def incrementate(ctx):
+    c.execute("SELECT count FROM guilds WHERE gid = ?", (ctx.guild.id,))
+    response = c.fetchone()
+    if response:
+        c.execute("UPDATE guilds SET count = ? WHERE gid = ?", (int(response[0]) + 1, ctx.guild.id,))
 def swearcheck(ctx, dat):
     swears = dat
     if swears:
@@ -116,18 +124,22 @@ async def on_message(ctx):
 
         else:
             await bot.process_commands(ctx)
-    
 
 @bot.event
 async def on_member_join(ctx):
     c.execute("SELECT welcome FROM guilds WHERE gid = ?", (ctx.guild.id,))
     welcome = c.fetchone()
-    if welcome:
-        await ctx.send(welcome[0].format(ctx.guild.name, ctx.guild.id, ctx.mention))
-
-@bot.command()
+    if welcome[0] != None:
+        await ctx.send(welcome[0].format(ctx.guild.name, ctx.guild.id, ctx.mention, ctx.name))
+@bot.event
+async def on_guild_join(ctx):
+    try:
+        c.execute("INSERT INTO guilds(gid, oid, premium, language, caps, url, count, prefix, chancemoji) VALUES(?, ?, 0, 'en', 0, 0, 0, '&', 0)", (ctx.id, ctx.guild.owner.id,))
+    except:
+        pass
+'''@bot.command()
 async def foo(ctx):
-    await ctx.reply(lang(ctx)["phrases"]["hello"])
+    await ctx.reply(lang(ctx)["phrases"]["hello"])'''
 @commands.has_guild_permissions(manage_guild=True)
 @commands.guild_only()
 @bot.command()
@@ -138,51 +150,65 @@ async def prefix(ctx, arg):
         c.execute("UPDATE guilds SET prefix = ? WHERE gid = ?", (arg, ctx.guild.id,))
         base.commit()
         await ctx.reply(lang(ctx)["phrases"]["prefix_success"].format(arg))
+        incrementate(ctx)
     except:
         await ctx.reply(lang(ctx)["phrases"]["prefix_fail"])
 @commands.has_guild_permissions(manage_guild=True)
 @commands.guild_only()
 @bot.command()
 async def language(ctx, arg):
-    if is_direct(ctx):
-        await ctx.send(languages[arg]["phrases"]["lang_direct"])
-    else:
-        if arg in languages.keys():
+    await ctx.send(languages[arg]["phrases"]["lang_direct"])
+    if arg in languages.keys():
+        try:
             c.execute("UPDATE guilds SET language = ? WHERE gid = ?", (arg, ctx.guild.id,))
             base.commit()
             await ctx.send(languages[arg]["phrases"]["lang_success"])
-        else:
-            await ctx.send(lang(ctx)["phrases"]["lang_fail"])
+            incrementate(ctx)
+        except sqlite3.DatabaseError:
+            await ctx.send(lang(ctx)["phrases"]["error_db"])
+    else:
+        await ctx.send(lang(ctx)["phrases"]["lang_fail"])
+@commands.cooldown(1, 1, commands.BucketType.user)
 @bot.command()
 async def blable(ctx, * , arg):
     #if not swearcheck(ctx.message) and not capscheck(ctx.message) and not linkcheck(ctx.message):
     await ctx.send(arg)
+@commands.cooldown(1, 3, commands.BucketType.user)
 @bot.command()
 async def zen(ctx):
     await ctx.send(lang(ctx)["zen"])
+    incrementate(ctx)
 @commands.has_permissions(manage_messages=True)
 @commands.guild_only()
 @bot.command()
 async def purge(ctx, arg:int = 5):
     await ctx.channel.purge(limit=arg)
+    incrementate(ctx)
+@commands.cooldown(1, 10, commands.BucketType.user)
 @bot.command()
 async def help(ctx, arg:typing.Optional[str] = "all"):
     if arg in lang(ctx)["help"]:
         await ctx.send(lang(ctx)["help"][arg])
+        incrementate(ctx)
     else:
         await ctx.send(lang(ctx)["help"]["not_found"])
+    if not is_direct(ctx): incrementate(ctx)
+@commands.cooldown(1, 2, commands.BucketType.user)
 @bot.command()
 async def coin(ctx):
     if choice([True, False]):
         await ctx.send(lang(ctx)["phrases"]["heads"])
     else:
         await ctx.send(lang(ctx)["phrases"]["tails"])
+    if not is_direct(ctx): incrementate(ctx)
+@commands.cooldown(1, 3, commands.BucketType.user)
 @bot.command()
 async def dice(ctx, arg:typing.Optional[int] = 6):
     try:
         await ctx.send(randint(1, arg))
     except:
         await ctx.send(lang(ctx)["phrases"]["dice_fail"])
+@commands.cooldown(1, 3, commands.BucketType.user)
 @bot.command()
 async def info(ctx):
     if is_direct(ctx):
@@ -192,8 +218,10 @@ async def info(ctx):
         count = c.fetchone()
         if count:
             await ctx.send(lang(ctx)["phrases"]["info"].format(version, count[0]))
+            incrementate(ctx)
         else:
             await ctx.send(lang(ctx)["phrases"]["info_fail"])
+@commands.cooldown(1, 3, commands.BucketType.user)
 @bot.command()
 async def eval(ctx, *, arg):
     arg = arg.replace("^", "**")
@@ -213,6 +241,8 @@ async def eval(ctx, *, arg):
                 await ctx.send(lang(ctx)["phrases"]["eval_zero"])
         except:
             await ctx.send(lang(ctx)["phrases"]["eval_fail"])
+            return
+    if not is_direct(ctx): incrementate(ctx)
 @commands.cooldown(1, 30, commands.BucketType.user)
 @bot.command()
 async def guess(ctx):
@@ -228,6 +258,7 @@ async def guess(ctx):
             if response[2]: tris = response[2]
             else: tris = 4
         else: time = 10; rang = 20; tris = 4
+        incrementate(ctx)
     num = randint(1, rang)
     await ctx.send(lang(ctx)["phrases"]["guess_start"].format(rang, time, tris))
     def check(m): 
@@ -264,10 +295,8 @@ async def math(ctx):
             else: rang = 100
             if response[2]: oper = response[2]
             else: oper = "+-"
-        else:
-            time = 10
-            rang = 100
-            oper = "+-"
+        else: time = 10; rang = 100; oper = "+-"
+        incrementate(ctx)
     neg = lambda x: "({})".format(x) if x < 0 else str(x) # Лямбда-функция, или статическая функция
     expr = str(randint(rang * -1, rang)) + choice(oper) + str(neg(randint(rang * -1, rang))) #str(randint(rang * -1, rang))
     num = round(float(evaluate(expr)), 2)
@@ -601,7 +630,9 @@ async def configure(ctx, comm=None, value1=None, value2 : typing.Union[discord.R
                     await ctx.send(lang(ctx)["phrases"]["configure_unknown"])
         case _:
             await ctx.send(lang(ctx)["phrases"]["configure_unknown"])
+    incrementate(ctx)
 @commands.has_guild_permissions(kick_members=True)
+@commands.cooldown(1, 3, commands.BucketType.user)
 @commands.guild_only()
 @bot.command()
 async def kick(ctx, member : discord.Member, reason = None):
@@ -611,7 +642,9 @@ async def kick(ctx, member : discord.Member, reason = None):
     else:
         reason = ""
     await ctx.send(lang(ctx)["phrases"]["kick_reason"].format(member, ctx.author.mention, reason))
+    incrementate(ctx)
 @commands.has_guild_permissions(ban_members=True)
+@commands.cooldown(1, 3, commands.BucketType.user)
 @commands.guild_only()
 @bot.command()
 async def ban(ctx, member : discord.Member, reason = None):
@@ -621,7 +654,9 @@ async def ban(ctx, member : discord.Member, reason = None):
     else:
         reason = ""
     await ctx.send(lang(ctx)["phrases"]["ban_reason"].format(member, ctx.author.mention, reason))
+    incrementate(ctx)
 @commands.has_guild_permissions(moderate_members=True)
+@commands.cooldown(1, 3, commands.BucketType.user)
 @commands.guild_only()
 @bot.command()
 async def mute(ctx, member : discord.Member, reason = None, days : int = 0, hours : int = 0, minutes : int = 5):
@@ -632,13 +667,17 @@ async def mute(ctx, member : discord.Member, reason = None, days : int = 0, hour
     else:
         reason = ""
     await ctx.send(lang(ctx)["phrases"]["mute_reason"].format(member, duration, ctx.author.mention, reason))
+    incrementate(ctx)
 @commands.has_guild_permissions(moderate_members=True)
+@commands.cooldown(1, 3, commands.BucketType.user)
 @commands.guild_only()
 @bot.command()
 async def unmute(ctx, member : discord.Member):
     await member.timeout(None)
     await ctx.send(lang(ctx)["phrases"]["unmute_reason"].format(member.mention, ctx.author.mention)) 
+    incrementate(ctx)
 @commands.has_guild_permissions(manage_guild=True)
+@commands.cooldown(1, 3, commands.BucketType.user)
 @commands.guild_only()
 @bot.command()
 async def register(ctx):
@@ -649,6 +688,8 @@ async def register(ctx):
         c.execute("INSERT INTO guilds(gid, oid, premium, language, caps, url, count, prefix, chancemoji) VALUES(?, ?, 0, 'en', 0, 0, 0, '&', 0)", (ctx.guild.id, ctx.guild.owner.id,))
         base.commit()
         await ctx.send(lang(ctx)["phrases"]["register_success"])
+        incrementate(ctx)
+@commands.cooldown(1, 3, commands.BucketType.user)
 @bot.command()
 async def poll(ctx, arg : int = 0):
     if arg == 0:
@@ -659,6 +700,7 @@ async def poll(ctx, arg : int = 0):
             await ctx.message.add_reaction(languages["en"]["symbolica"]["poll"][i])
     else:
         await ctx.send(lang(ctx)["phrases"]["poll_fail"])
+    if not is_direct(ctx): incrementate(ctx)
         
 @bot.event
 async def on_command_error(ctx, error):
@@ -668,7 +710,10 @@ async def on_command_error(ctx, error):
         case commands.errors.MissingPermissions:
             await ctx.send(lang(ctx)["phrases"]["error_permissions_your"])
         case discord.Forbidden:
-            await ctx.send(lang(ctx)["phrases"]["error_permissions_mine"])
+            try:
+                await ctx.send(lang(ctx)["phrases"]["error_permissions_mine"])
+            except:
+                pass
         case commands.errors.BadArgument:
             await ctx.send(lang(ctx)["phrases"]["error_argument"])
         case commands.errors.NoPrivateMessage:
@@ -678,6 +723,10 @@ async def on_command_error(ctx, error):
         case commands.errors.CommandOnCooldown:
             pass
         case _:
-            await ctx.send(lang(ctx)["phrases"]["error"])
+            try:
+                await ctx.send(lang(ctx)["phrases"]["error"])
+                await debug.send(f"ROWAN ИСПЫТЫВАЕТ ПРОБЛЕМУ: {error}")
+            except:
+                pass
             print(error)
 bot.run(token)
