@@ -1,6 +1,5 @@
 {
     "phrases" : {
-        "welcome" : "Welcome to {0}, I hope you enjoy your stay",
         "hello" : "Hello, World!",
         "lang_success" : "Language is successfully switched to English",
         "lang_fail" : "Language not recognized!",
@@ -51,9 +50,29 @@
         "register_already" : "This guild is already registered.",
         "configure_excluded" : "Excluded roles: {0}\nExcluded channels {1}"
     },
+
     "help" : {
-        "all": "the help command",
+        "all": "List of all Rowan commands:\n- help - shows this message\nAdmin commands:\n- prefix - updates the prefix\n- language - sets the language\n- register - registers your guild\n- configure - configures the preferences\nMod commands:\n- kick - kicks a user\n- ban - bans a user\n- mute - timeouts a user\n- unmute - unmutes a user\n- purge - clears a part of chat\nGeneral commands:\n- blable - copies what you say\n- zen - quotes ''The Zen of Python''\n- coin - flips a coin\n- dice - rolls a dice\n- poll - creates a poll\n- math - starts a math game\n- guess - starts a number guesser\n- eval - solves a math problem or equation\nUse help <a> where a is command to know more about it. *p is optional.",
         "help" : "Help - shows list of all commands. Help <a> - description of command <a>.",
+        "prefix" : "Prefix <p> - sets your guilds prefix to p. Use quotation marks to make prefix with spacing.",
+        "language" : "Language <l> - sets language to l. Available languages: Russian (ru), English (en).",
+        "blable" : "Blable - copies what you write after it.",
+        "zen" : "Zen - prints out the ''Zen of Python''.",
+        "purge" : "Purge <n> - deletes n messages from bottom. You require rights to manage messages!",
+        "coin" : "Coin - flips a coin.",
+        "dice" : "Dice <*s> - rolls a dice with s sides. If you don't provide any, rolls 6.",
+        "info" : "Info - shows bot version and the amount of executed commands on Your guild.",
+        "eval" : "Eval <p> - evaluates p problem. Allows equations. Use ^ or ** for getting value1 to the power of value 2. Write x with coeffitients separating them with *.",
+        "guess" : "Guess - starts a number guesser game.",
+        "math" : "Math - starts an alithmetic problem solver game.",
+        "configure" : "Configure <c> <v1> <*v2> - configures c setting (or v1 subsetting of c setting) with v2. Read detailed info about each setting on our website: https://rowanbot.ru/configuration.html",
+        "kick" : "Kick <p> <*r> - kicks p person with r reason.",
+        "ban" : "Ban <p> <*r> - bans p person with r reason.",
+        "mute" : "Mute <p> <*r> <*d> <*h> <*m> - timeouts p person with r reason for d days, h hours and m minutes. Mutes for 5 mins if no arguments provided.",
+        "unmute" : "Unmute <p> - unmutes p person. (Sends a message even if person is not timeouted)",
+        "register" : "Registers your guild in Rowan database for allowing configuration. Since 0.7 this command is mostly for debugging purposes.",
+        "poll" : "Poll <*a> - Adds a ''poll'' using keycap emojis with numbers up to a. Max 10 min 2. If none is provided, makes it a yes/no poll.",
+        "foo" : "Debug command for language and prefix testing. Why do you know it's there?",
         "not_found" : "No such command found."
     },
     "symbolica" : {
