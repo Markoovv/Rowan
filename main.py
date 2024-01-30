@@ -148,12 +148,12 @@ async def foo(ctx):
 async def prefix(ctx, arg):
     try:
         if len(arg) > 32:
-            raise TypeError("Too long!")
+            raise TypeError
         c.execute("UPDATE guilds SET prefix = ? WHERE gid = ?", (arg, ctx.guild.id,))
         base.commit()
         await ctx.reply(lang(ctx)["phrases"]["prefix_success"].format(arg))
         incrementate(ctx)
-    except:
+    except TypeError:
         await ctx.reply(lang(ctx)["phrases"]["prefix_fail"])
 @bot.command()
 async def foo(ctx):
