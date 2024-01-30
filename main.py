@@ -116,9 +116,10 @@ async def on_message(ctx):
                 else:
                     if randint(1, 100) <= int(response[5]):
                         try:
-                            await ctx.add_reaction(choice(languages["en"]["symbolica"]["emoji"] + ctx.guild.emojis))
-                        except commands.Forbidden:
-                            pass
+                            await ctx.add_reaction(choice(tuple(languages["en"]["symbolica"]["emoji"]) + ctx.guild.emojis))
+                        except discord.Forbidden:
+                            c.execute("UPDATE guilds SET chancemoji = 0 WHERE gid = ?", (ctx.guild.id,))
+                            base.commit()
                     await bot.process_commands(ctx)
 
         else:
@@ -322,6 +323,7 @@ async def math(ctx):
         await ctx.send(lang(ctx)["phrases"]["math_fail_time"].format(num))
     
 @commands.has_permissions(manage_guild=True)
+@commands.cooldown(1, 5, commands.BucketType.user)
 @commands.guild_only()
 @bot.command()
 async def configure(ctx, comm=None, value1=None, value2 : typing.Union[discord.Role, discord.TextChannel, str] = None):
@@ -331,86 +333,120 @@ async def configure(ctx, comm=None, value1=None, value2 : typing.Union[discord.R
             match value1:
                 case "range":
                     try:
-                        value = int(value2)
-                        if value <= 1000 and value >= 5:
-                            c.execute("UPDATE guilds SET mathrange = ? WHERE gid = ?", (value, ctx.guild.id,))
-                            base.commit()
-                            await ctx.send(lang(ctx)["phrases"]["configure_success"].format(f"{comm} {value1}", value2))
+                        if value2 is not None:
+                            value = int(value2)
+                            if value <= 1000 and value >= 5:
+                                c.execute("UPDATE guilds SET mathrange = ? WHERE gid = ?", (value, ctx.guild.id,))
+                                base.commit()
+                                await ctx.send(lang(ctx)["phrases"]["configure_success"].format(f"{comm} {value1}", value2))
+                            else:
+                                raise ValueError
                         else:
-                            raise ValueError
-                    except sqlite3.DatabaseError:
+                            c.execute("SELECT mathrange FROM guilds WHERE gid = ?", (ctx.guild.id,))
+                            response = c.fetchone()
+                            if response:
+                                await ctx.send(f"{response[0] * -1}-{response[0]}")
+                    except sqlite3.DatabaseError and AttributeError:
                         await ctx.send(lang(ctx)["phrases"]["error_db"])
                     except ValueError:
                         await ctx.send(lang(ctx)["phrases"]["configure_fail_int"])
                 case "time":
                     try:
-                        value = int(value2)
-                        if value <= 120 and value >= 5:
-                            c.execute("UPDATE guilds SET mathtime = ? WHERE gid = ?", (value, ctx.guild.id,))
-                            base.commit()
-                            await ctx.send(lang(ctx)["phrases"]["configure_success"].format(f"{comm} {value1}", value2))
+                        if value2 is not None:
+                            value = int(value2)
+                            if value <= 120 and value >= 5:
+                                c.execute("UPDATE guilds SET mathtime = ? WHERE gid = ?", (value, ctx.guild.id,))
+                                base.commit()
+                                await ctx.send(lang(ctx)["phrases"]["configure_success"].format(f"{comm} {value1}", value2))
+                            else:
+                                raise ValueError
                         else:
-                            raise ValueError
-                    except sqlite3.DatabaseError:
+                            c.execute("SELECT mathtime FROM guilds WHERE gid = ?", (ctx.guild.id,))
+                            response = c.fetchone()
+                            if response:
+                                await ctx.send(f"{response[0]}s")
+                    except sqlite3.DatabaseError and AttributeError:
                         await ctx.send(lang(ctx)["phrases"]["error_db"])
                     except ValueError:
                         await ctx.send(lang(ctx)["phrases"]["configure_fail_int"])
                 case "ops":
-                    if any(char not in "+-*/^" for char in value2):
-                        await ctx.send(lang(ctx)["phrases"]["configure_fail_other"])
-                        print("ended in cycle 1")
-                    else:
-                        if any(value2.count(char) > 1 for char in value2):
-                            await ctx.send(lang(ctx)["phrases"]["configure_fail_other"])
-                            print("ended in cycle 2")
-                            for char in value2:
-                                print(value2.count(char))
+                    try:
+                        if value2 is not None:
+                            if any(char not in "+-*/^" for char in value2):
+                                raise ValueError
+                            else:
+                                if any(value2.count(char) > 1 for char in value2):
+                                    raise ValueError
+                                else:
+                                    c.execute("UPDATE guilds SET mathops = ? WHERE gid = ?", (value2, ctx.guild.id,))
+                                    base.commit()
+                                    await ctx.send(lang(ctx)["phrases"]["configure_success"].format(value1, value2))
                         else:
-                            try:
-                                c.execute("UPDATE guilds SET mathops = ? WHERE gid = ?", (value2, ctx.guild.id,))
-                                base.commit()
-                                await ctx.send(lang(ctx)["phrases"]["configure_success"].format(value1, value2))
-                            except sqlite3.DatabaseError:
-                                await ctx.send(lang(ctx)["phrases"]["error_db"])
+                            c.execute("SELECT mathops FROM guilds WHERE gid = ?", (ctx.guild.id,))
+                            response = c.fetchone()
+                            if response:
+                                await ctx.send(response[0])
+                    except ValueError:
+                        await ctx.send(lang(ctx)["phrases"]["configure_fail_other"])
+                    except sqlite3.DatabaseError and AttributeError:
+                        await ctx.send(lang(ctx)["phrases"]["error_db"])
                 case _:
                     await ctx.send(lang(ctx)["phrases"]["configure_unknown"])
         case "guess":
             match value1:
                 case "range":
                     try:
-                        value = int(value2)
-                        if value <= 1000 and value >= 5:
-                            c.execute("UPDATE guilds SET mathrange = ? WHERE gid = ?", (value, ctx.guild.id,))
-                            await ctx.send(lang(ctx)["phrases"]["configure_success"].format(f"{comm} {value1}", value2))
+                        if value2 is not None:
+                            value = int(value2)
+                            if value <= 1000 and value >= 5:
+                                c.execute("UPDATE guilds SET guessrange = ? WHERE gid = ?", (value, ctx.guild.id,))
+                                await ctx.send(lang(ctx)["phrases"]["configure_success"].format(f"{comm} {value1}", value2))
+                            else:
+                                raise ValueError
                         else:
-                            raise ValueError
-                    except sqlite3.DatabaseError:
+                            c.execute("SELECT guessrange FROM guilds WHERE gid = ?", (ctx.guild.id,))
+                            response = c.fetchone()
+                            if response:
+                                await ctx.send(f"{response[0] * -1}-{response[0]}")
+                    except sqlite3.DatabaseError and AttributeError:
                         await ctx.send(lang(ctx)["phrases"]["error_db"])
                     except ValueError:
                         await ctx.send(lang(ctx)["phrases"]["configure_fail_int"])
                 case "time":
                     try:
-                        value = int(value2)
-                        if value <= 120 and value >= 5:
-                            c.execute("UPDATE guilds SET mathtime = ? WHERE gid = ?", (value, ctx.guild.id,))
-                            base.commit()
-                            await ctx.send(lang(ctx)["phrases"]["configure_success"].format(f"{comm} {value1}", value2))
+                        if value2 is not None:
+                            value = int(value2)
+                            if value <= 120 and value >= 5:
+                                c.execute("UPDATE guilds SET guesstime = ? WHERE gid = ?", (value, ctx.guild.id,))
+                                base.commit()
+                                await ctx.send(lang(ctx)["phrases"]["configure_success"].format(f"{comm} {value1}", value2))
+                            else:
+                                raise ValueError
                         else:
-                            raise ValueError
-                    except sqlite3.DatabaseError:
+                            c.execute("SELECT guesstime FROM guilds WHERE gid = ?", (ctx.guild.id,))
+                            response = c.fetchone()
+                            if response:
+                                await ctx.send(f"{response[0]}s")
+                    except sqlite3.DatabaseError and AttributeError:
                         await ctx.send(lang(ctx)["phrases"]["error_db"])
                     except ValueError:
                         await ctx.send(lang(ctx)["phrases"]["configure_fail_int"])
                 case "tries":
                     try:
-                        value = int(value2)
-                        if value <= 32 and value >= 1:
-                            c.execute("UPDATE guilds SET mathtime = ? WHERE gid = ?", (value, ctx.guild.id,))
-                            base.commit()
-                            await ctx.send(lang(ctx)["phrases"]["configure_success"].format(f"{comm} {value1}", value2))
+                        if value2 is not None:
+                            value = int(value2)
+                            if value <= 32 and value >= 1:
+                                c.execute("UPDATE guilds SET guesstries = ? WHERE gid = ?", (value, ctx.guild.id,))
+                                base.commit()
+                                await ctx.send(lang(ctx)["phrases"]["configure_success"].format(f"{comm} {value1}", value2))
+                            else:
+                                raise ValueError
                         else:
-                            raise ValueError
-                    except sqlite3.DatabaseError:
+                            c.execute("SELECT guesstries FROM guilds WHERE gid = ?", (ctx.guild.id,))
+                            response = c.fetchone()
+                            if response:
+                                await ctx.send(str(response[0]))
+                    except sqlite3.DatabaseError and AttributeError:
                         await ctx.send(lang(ctx)["phrases"]["error_db"])
                     except ValueError:
                         await ctx.send(lang(ctx)["phrases"]["configure_fail_int"])
@@ -432,7 +468,7 @@ async def configure(ctx, comm=None, value1=None, value2 : typing.Union[discord.R
                 except TypeError:
                     await ctx.send(lang(ctx)["phrases"]["configure_fail_format"])
                     return
-                except sqlite3.DatabaseError:
+                except sqlite3.DatabaseError and AttributeError:
                     await ctx.send(lang(ctx)["phrases"]["error_db"])
                     return
                 c.execute("UPDATE guilds SET welcome = ? WHERE gid = ?", (value1, ctx.guild.id))
@@ -449,22 +485,32 @@ async def configure(ctx, comm=None, value1=None, value2 : typing.Union[discord.R
             match value1:
                 case "url":
                     try:
-                        if int(value2) == 1 or int(value2) == 0:
-                            c.execute("UPDATE guilds SET url = ? WHERE gid = ?", (value2, ctx.guild.id,))
-                            base.commit()
-                            await ctx.send(lang(ctx)["phrases"]["configure_success"].format(value1, value2))
+                        if value2 is not None:
+                            if int(value2) == 1 or int(value2) == 0:
+                                c.execute("UPDATE guilds SET url = ? WHERE gid = ?", (value2, ctx.guild.id,))
+                                base.commit()
+                                await ctx.send(lang(ctx)["phrases"]["configure_success"].format(value1, value2))
+                            else:
+                                raise ValueError
                         else:
-                            raise ValueError
+                            c.execute("SELECT url FROM guilds WHERE gid = ?", (ctx.guild.id,))
+                            response = c.fetchone()
+                            if response:
+                                await ctx.send(str(response[0]))
                     except ValueError:
                         await ctx.send(lang(ctx)["phrases"]["configure_fail_bool"])
                     except sqlite3.DatabaseError:
                         await ctx.send(lang(ctx)["phrases"]["error_db"])
                 case "swear":
                     try:
-                        if value2:
-                            c.execute("UPDATE guilds SET swear = ? WHERE gid = ?", (value2.lower(), ctx.guild.id,))
+                        if value2 != "null" and value2 is not None:
+                            c.execute("UPDATE guilds SET swear = ? WHERE gid = ?", (str(value2).lower(), ctx.guild.id,))
                             base.commit()
                             await ctx.send(lang(ctx)["phrases"]["configure_success"].format(f"{comm}-{value1}", f'"{value2}"'))
+                        elif value2 == "null":
+                            c.execute("UPDATE guilds SET swear = ? WHERE gid = ?", (None, ctx.guild.id,))
+                            base.commit()
+                            await ctx.send(lang(ctx)["phrases"]["configure_success"].format(f"{comm}-{value1}", "None"))
                         else:
                             c.execute("SELECT swear FROM guilds WHERE gid = ?", (ctx.guild.id,))
                             response = c.fetchone()
@@ -472,7 +518,7 @@ async def configure(ctx, comm=None, value1=None, value2 : typing.Union[discord.R
                                 await ctx.send(response[0])
                             else:
                                 await ctx.send("None")
-                    except sqlite3.DatabaseError:
+                    except sqlite3.DatabaseError and AttributeError:
                         await ctx.send(lang(ctx)["phrases"]["error_db"])
                 case "caps":
                     if value2:
@@ -486,7 +532,7 @@ async def configure(ctx, comm=None, value1=None, value2 : typing.Union[discord.R
                                 raise ValueError
                         except ValueError:
                             await ctx.send(lang(ctx)["phrases"]["configure_fail_int"])
-                        except sqlite3.DatabaseError:
+                        except sqlite3.DatabaseError and AttributeError:
                             await ctx.send(lang(ctx)["phrases"]["error_db"])
                     else:
                         c.execute("SELECT caps FROM guilds WHERE gid = ?", (ctx.guild.id,))
@@ -577,7 +623,7 @@ async def configure(ctx, comm=None, value1=None, value2 : typing.Union[discord.R
                                 c.execute("UPDATE guilds SET erid = NULL WHERE gid = ?", (ctx.guild.id,))
                                 base.commit()
                                 await ctx.send(lang(ctx)["phrases"]["configure_success"].format(f"{comm}-{value2}", "None"))
-                            except sqlite3.DatabaseError:
+                            except sqlite3.DatabaseError and AttributeError:
                                 await ctx.send(lang(ctx)["phrases"]["error_db"])
                         case _:
                             await ctx.send(lang(ctx)["phrases"]["configure_unknown"])
@@ -606,16 +652,22 @@ async def configure(ctx, comm=None, value1=None, value2 : typing.Union[discord.R
             match value1:
                 case "emoji":
                     try:
-                        chance = int(value2)
-                        if chance >= 0 or chance <= 100:
-                            c.execute("UPDATE guilds SET chancemoji = ? WHERE gid = ?", (chance, ctx.guild.id,))
-                            base.commit()
-                            await ctx.send(lang(ctx)["phrases"]["configure_success"].format(value1, f"{chance}%"))
+                        if value2 is not None:
+                            chance = int(value2)
+                            if chance >= 0 or chance <= 100:
+                                c.execute("UPDATE guilds SET chancemoji = ? WHERE gid = ?", (chance, ctx.guild.id,))
+                                base.commit()
+                                await ctx.send(lang(ctx)["phrases"]["configure_success"].format(value1, f"{chance}%"))
+                            else:
+                                raise ValueError
                         else:
-                            raise ValueError
+                            c.execute("SELECT chancemoji FROM guilds WHERE gid = ?", (ctx.guild.id,))
+                            response = c.fetchone()
+                            if response:
+                                await ctx.send(f"{response[0]}%")
                     except ValueError:
                         await ctx.send(lang(ctx)["phrases"]["configure_fail_int"])
-                    except sqlite3.DatabaseError:
+                    except sqlite3.DatabaseError and AttributeError:
                         await ctx.send(lang(ctx)["phrases"]["configure_fail_db"])
                 case _:
                     await ctx.send(lang(ctx)["phrases"]["configure_unknown"])
@@ -697,7 +749,9 @@ async def shutdown(ctx):
     if ctx.author.id == 619200346379780098 or ctx.author.id == 1125066987421302876:
         base.commit()
         base.close()
-        exit()
+        exit
+    else:
+        await ctx.send(lang(ctx)["phrases"]["configure_unknown"])
 @bot.event
 async def on_command_error(ctx, error):
     match type(error):
@@ -722,7 +776,7 @@ async def on_command_error(ctx, error):
             try:
                 await ctx.send(lang(ctx)["phrases"]["error"])
                 await debug.send(f"ROWAN ИСПЫТЫВАЕТ ПРОБЛЕМУ: {error}")
-            except:
-                pass
+            except Exception as e:
+                print(e)
             print(error)
 bot.run(token)
