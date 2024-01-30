@@ -57,7 +57,7 @@ def lang(ctx):
 def incrementate(ctx):
     c.execute("SELECT count FROM guilds WHERE gid = ?", (ctx.guild.id,))
     response = c.fetchone()
-    if response:
+    if response  is not None:
         c.execute("UPDATE guilds SET count = ? WHERE gid = ?", (int(response[0]) + 1, ctx.guild.id,))
 def swearcheck(ctx, dat):
     swears = dat
@@ -98,7 +98,7 @@ async def on_message(ctx):
     else:
         c.execute("SELECT swear, caps, url, erid, ecid, chancemoji FROM guilds WHERE gid = ?", (ctx.guild.id,))
         response = c.fetchone()
-        if response:
+        if response is not None:
             if response[3]:
                 erid = response[3].split(",")
             else:
@@ -128,8 +128,9 @@ async def on_message(ctx):
 async def on_member_join(ctx):
     c.execute("SELECT welcome FROM guilds WHERE gid = ?", (ctx.guild.id,))
     welcome = c.fetchone()
-    if welcome[0] != None:
-        await ctx.send(welcome[0].format(ctx.guild.name, ctx.guild.id, ctx.mention, ctx.name))
+    if welcome is not None:
+        if welcome[0]:
+            await ctx.send(welcome[0].format(ctx.guild.name, ctx.guild.id, ctx.mention, ctx.name))
 @bot.event
 async def on_guild_join(ctx):
     try:
@@ -219,7 +220,7 @@ async def info(ctx):
     else:
         c.execute("SELECT count FROM guilds WHERE gid = ?", (ctx.guild.id,))
         count = c.fetchone()
-        if count:
+        if count is not None:
             await ctx.send(lang(ctx)["phrases"]["info"].format(version, count[0]))
             incrementate(ctx)
         else:
@@ -494,7 +495,7 @@ async def configure(ctx, comm=None, value1=None, value2 : typing.Union[discord.R
                     if type(value2) == discord.TextChannel:
                         c.execute("SELECT ecid FROM guilds WHERE gid = ?", (ctx.guild.id,))
                         response = c.fetchone()
-                        if response[0] != None:
+                        if response is not None:
                             if str(value2.id) in response[0].split(","):
                                 await ctx.send(lang(ctx)["phrases"]["configure_fail_already"].format(f"<#{value2.id}>", f"{comm}-{value1}"))
                                 return
@@ -505,7 +506,7 @@ async def configure(ctx, comm=None, value1=None, value2 : typing.Union[discord.R
                     elif type(value2) == discord.Role:
                         c.execute("SELECT erid FROM guilds WHERE gid = ?", (ctx.guild.id,))
                         response = c.fetchone()
-                        if response[0] != None:
+                        if response is not None:
                             if str(value2.id) in response[0].split(","):
                                 await ctx.send(lang(ctx)["phrases"]["configure_fail_already"].format(f"<@&{value2.id}>", f"{comm}-{value1}"))
                                 return
@@ -519,7 +520,7 @@ async def configure(ctx, comm=None, value1=None, value2 : typing.Union[discord.R
                     if type(value2) == discord.TextChannel:
                         c.execute("SELECT ecid FROM guilds WHERE gid = ?", (ctx.guild.id,))
                         response = c.fetchone()
-                        if response[0] != None:
+                        if response is not None:
                             if str(value2.id) in response[0].split(","):
                                 new_filter = response[0].replace(f"{value2.id},", "")
                             else:
@@ -536,7 +537,7 @@ async def configure(ctx, comm=None, value1=None, value2 : typing.Union[discord.R
                     elif type(value2) == discord.Role:
                         c.execute("SELECT erid FROM guilds WHERE gid = ?", (ctx.guild.id,))
                         response = c.fetchone()
-                        if response[0] != None:
+                        if response is not None:
                             if str(value2.id) in response[0].split(","):
                                 new_filter = response[0].replace(f"{value2.id},", "")
                             else:
@@ -573,7 +574,7 @@ async def configure(ctx, comm=None, value1=None, value2 : typing.Union[discord.R
                 case None:
                     c.execute("SELECT erid, ecid FROM guilds WHERE gid = ?", (ctx.guild.id,))
                     response = c.fetchone()
-                    if response:
+                    if response  is not None:
                         rols = ""
                         chans = ""
                         if response[0] != None:
