@@ -107,7 +107,7 @@ async def on_message(ctx):
                 ecid = response[4].split(",")
             else:
                 ecid = []
-            if (ctx.channel.id in ecid) or any(role.id in erid for role in ctx.author.roles):
+            if (str(ctx.channel.id) in ecid) or any(str(role.id) in erid for role in ctx.author.roles):
                 await bot.process_commands(ctx)
             else:
                 #print(response[1])
@@ -461,9 +461,17 @@ async def configure(ctx, comm=None, value1=None, value2 : typing.Union[discord.R
                         await ctx.send(lang(ctx)["phrases"]["error_db"])
                 case "swear":
                     try:
-                        c.execute("UPDATE guilds SET swear = ? WHERE gid = ?", (value2.lower(), ctx.guild.id,))
-                        base.commit()
-                        await ctx.send(lang(ctx)["phrases"]["configure_success"].format(f"{comm}-{value1}", f'"{value2}"'))
+                        if value2:
+                            c.execute("UPDATE guilds SET swear = ? WHERE gid = ?", (value2.lower(), ctx.guild.id,))
+                            base.commit()
+                            await ctx.send(lang(ctx)["phrases"]["configure_success"].format(f"{comm}-{value1}", f'"{value2}"'))
+                        else:
+                            c.execute("SELECT swear FROM guilds WHERE gid = ?", (ctx.guild.id,))
+                            response = c.fetchone()
+                            if response[0]:
+                                await ctx.send(response[0])
+                            else:
+                                await ctx.send("None")
                     except sqlite3.DatabaseError:
                         await ctx.send(lang(ctx)["phrases"]["error_db"])
                 case "caps":
@@ -496,9 +504,10 @@ async def configure(ctx, comm=None, value1=None, value2 : typing.Union[discord.R
                         c.execute("SELECT ecid FROM guilds WHERE gid = ?", (ctx.guild.id,))
                         response = c.fetchone()
                         if response is not None:
-                            if str(value2.id) in response[0].split(","):
-                                await ctx.send(lang(ctx)["phrases"]["configure_fail_already"].format(f"<#{value2.id}>", f"{comm}-{value1}"))
-                                return
+                            if response[0]:
+                                if str(value2.id) in response[0].split(","):
+                                    await ctx.send(lang(ctx)["phrases"]["configure_fail_already"].format(f"<#{value2.id}>", f"{comm}-{value1}"))
+                                    return
                         new_filter = str(response[0] or '') + f"{value2.id},"
                         c.execute("UPDATE guilds SET ecid = ? WHERE gid = ?", (new_filter, ctx.guild.id,))
                         base.commit()
@@ -507,9 +516,10 @@ async def configure(ctx, comm=None, value1=None, value2 : typing.Union[discord.R
                         c.execute("SELECT erid FROM guilds WHERE gid = ?", (ctx.guild.id,))
                         response = c.fetchone()
                         if response is not None:
-                            if str(value2.id) in response[0].split(","):
-                                await ctx.send(lang(ctx)["phrases"]["configure_fail_already"].format(f"<@&{value2.id}>", f"{comm}-{value1}"))
-                                return
+                            if response[0]:
+                                if str(value2.id) in response[0].split(","):
+                                    await ctx.send(lang(ctx)["phrases"]["configure_fail_already"].format(f"<@&{value2.id}>", f"{comm}-{value1}"))
+                                    return
                         new_filter = str(response[0] or '') + f"{value2.id},"
                         c.execute("UPDATE guilds SET erid = ? WHERE gid = ?", (new_filter, ctx.guild.id,))
                         base.commit()
@@ -682,7 +692,12 @@ async def poll(ctx, arg : int = 0):
     else:
         await ctx.send(lang(ctx)["phrases"]["poll_fail"])
     if not is_direct(ctx): incrementate(ctx)
-        
+@bot.command()
+async def shutdown(ctx):
+    if ctx.author.id == 619200346379780098 or ctx.author.id == 1125066987421302876:
+        base.commit()
+        base.close()
+        exit()
 @bot.event
 async def on_command_error(ctx, error):
     match type(error):
