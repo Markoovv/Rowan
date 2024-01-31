@@ -591,10 +591,10 @@ async def configure(ctx, comm=None, value1=None, value2 : typing.Union[discord.R
                                 if str(value2.id) in response[0].split(","):
                                     new_filter = response[0].replace(f"{value2.id},", "")
                                 else:
-                                    await ctx.send(lang(ctx)["phrases"]["configure_fail_notincluded"].format(f"<#{value2.id}>", str(comm)))
+                                    await ctx.send(lang(ctx)["phrases"]["configure_fail_notincluded"].format(f"<@&{value2.id}>", str(comm)))
                                     return
                             else:
-                                await ctx.send(lang(ctx)["phrases"]["configure_fail_notincluded"].format(f"<#{value2.id}>", str(comm)))
+                                await ctx.send(lang(ctx)["phrases"]["configure_fail_notincluded"].format(f"<@&{value2.id}>", str(comm)))
                                 return
                         else:
                             await ctx.send(lang(ctx)["phrases"]["configure_fail_notincluded"].format(f"<@&{value2.id}>", str(comm)))
