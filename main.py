@@ -1,7 +1,7 @@
 # Rowan bot by VladZodchey
 
 import discord, json, os, sqlite3, typing, asyncio, re
-from datetime import datetime, timedelta
+from datetime import timedelta
 from discord.ext import commands
 from random import choice, randint
 from sympy import solve, sympify
