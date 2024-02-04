@@ -191,7 +191,7 @@ async def language(ctx, arg):
 async def blable(ctx, * , arg):
     #if not swearcheck(ctx.message) and not capscheck(ctx.message) and not linkcheck(ctx.message):
     await ctx.send(arg)
-@commands.cooldown(1, 3, commands.BucketType.user)
+@commands.cooldown(1, 1, commands.BucketType.user)
 @bot.command()
 async def zen(ctx):
     await ctx.send(lang(ctx)["zen"])
@@ -202,7 +202,7 @@ async def zen(ctx):
 async def purge(ctx, arg:int = 5):
     await ctx.channel.purge(limit=arg)
     incrementate(ctx)
-@commands.cooldown(1, 5, commands.BucketType.user)
+@commands.cooldown(1, 1, commands.BucketType.user)
 @bot.command()
 async def help(ctx, arg:typing.Optional[str] = "all"):
     if arg in lang(ctx)["help"]:
@@ -211,7 +211,7 @@ async def help(ctx, arg:typing.Optional[str] = "all"):
     else:
         await ctx.send(lang(ctx)["help"]["not_found"])
     if not is_direct(ctx): incrementate(ctx)
-@commands.cooldown(1, 2, commands.BucketType.user)
+@commands.cooldown(1, 1, commands.BucketType.user)
 @bot.command()
 async def coin(ctx):
     if choice([True, False]):
@@ -219,14 +219,14 @@ async def coin(ctx):
     else:
         await ctx.send(lang(ctx)["phrases"]["tails"])
     if not is_direct(ctx): incrementate(ctx)
-@commands.cooldown(1, 3, commands.BucketType.user)
+@commands.cooldown(1, 1, commands.BucketType.user)
 @bot.command()
 async def dice(ctx, arg:typing.Optional[int] = 6):
     try:
         await ctx.send(randint(1, arg))
     except:
         await ctx.send(lang(ctx)["phrases"]["dice_fail"])
-@commands.cooldown(1, 3, commands.BucketType.user)
+@commands.cooldown(1, 1, commands.BucketType.user)
 @bot.command()
 async def info(ctx):
     if is_direct(ctx):
@@ -239,7 +239,7 @@ async def info(ctx):
             incrementate(ctx)
         else:
             await ctx.send(lang(ctx)["phrases"]["info_fail"])
-@commands.cooldown(1, 3, commands.BucketType.user)
+@commands.cooldown(1, 1, commands.BucketType.user)
 @bot.command()
 async def eval(ctx, *, arg = "9+10"):
     arg = arg.replace("^", "**")
@@ -261,7 +261,7 @@ async def eval(ctx, *, arg = "9+10"):
             await ctx.send(lang(ctx)["phrases"]["eval_fail"])
             return
     if not is_direct(ctx): incrementate(ctx)
-@commands.cooldown(1, 30, commands.BucketType.user)
+@commands.cooldown(1, 1, commands.BucketType.user)
 @bot.command()
 async def guess(ctx):
     if is_direct(ctx): time = 10; rang = 20; tris = 4
@@ -296,7 +296,7 @@ async def guess(ctx):
         except asyncio.TimeoutError:
             return await ctx.send(lang(ctx)["phrases"]["guess_fail_time"].format(num))
     await ctx.send(lang(ctx)["phrases"]["guess_fail_tries"].format(num))
-@commands.cooldown(1, 10, commands.BucketType.user)
+@commands.cooldown(1, 1, commands.BucketType.user)
 @bot.command()
 async def math(ctx):
     if is_direct(ctx): 
@@ -336,7 +336,7 @@ async def math(ctx):
         await ctx.send(lang(ctx)["phrases"]["math_fail_time"].format(num))
     
 @commands.has_permissions(manage_guild=True)
-@commands.cooldown(1, 5, commands.BucketType.user)
+@commands.cooldown(1, 1, commands.BucketType.user)
 @commands.guild_only()
 @bot.command()
 async def configure(ctx, comm=None, value1=None, value2 : typing.Union[discord.Role, discord.TextChannel, str] = None):
@@ -678,7 +678,7 @@ async def configure(ctx, comm=None, value1=None, value2 : typing.Union[discord.R
             await ctx.send(lang(ctx)["phrases"]["configure_unknown"])
     incrementate(ctx)
 @commands.has_guild_permissions(kick_members=True)
-@commands.cooldown(1, 3, commands.BucketType.user)
+@commands.cooldown(1, 1, commands.BucketType.user)
 @commands.guild_only()
 @bot.command()
 async def kick(ctx, member : discord.Member, reason = None):
@@ -690,7 +690,7 @@ async def kick(ctx, member : discord.Member, reason = None):
     await ctx.send(lang(ctx)["phrases"]["kick_reason"].format(member, ctx.author.mention, reason))
     incrementate(ctx)
 @commands.has_guild_permissions(ban_members=True)
-@commands.cooldown(1, 3, commands.BucketType.user)
+@commands.cooldown(1, 1, commands.BucketType.user)
 @commands.guild_only()
 @bot.command()
 async def ban(ctx, member : discord.Member, reason = None):
@@ -702,7 +702,7 @@ async def ban(ctx, member : discord.Member, reason = None):
     await ctx.send(lang(ctx)["phrases"]["ban_reason"].format(member, ctx.author.mention, reason))
     incrementate(ctx)
 @commands.has_guild_permissions(moderate_members=True)
-@commands.cooldown(1, 3, commands.BucketType.user)
+@commands.cooldown(1, 1, commands.BucketType.user)
 @commands.guild_only()
 @bot.command()
 async def mute(ctx, member : discord.Member, reason = None, days : int = 0, hours : int = 0, minutes : int = 5):
@@ -715,7 +715,7 @@ async def mute(ctx, member : discord.Member, reason = None, days : int = 0, hour
     await ctx.send(lang(ctx)["phrases"]["mute_reason"].format(member, duration, ctx.author.mention, reason))
     incrementate(ctx)
 @commands.has_guild_permissions(moderate_members=True)
-@commands.cooldown(1, 3, commands.BucketType.user)
+@commands.cooldown(1, 1, commands.BucketType.user)
 @commands.guild_only()
 @bot.command()
 async def unmute(ctx, member : discord.Member):
@@ -723,7 +723,7 @@ async def unmute(ctx, member : discord.Member):
     await ctx.send(lang(ctx)["phrases"]["unmute_reason"].format(member.mention, ctx.author.mention)) 
     incrementate(ctx)
 @commands.has_guild_permissions(manage_guild=True)
-@commands.cooldown(1, 3, commands.BucketType.user)
+@commands.cooldown(1, 10, commands.BucketType.guild)
 @commands.guild_only()
 @bot.command()
 async def register(ctx):
@@ -734,7 +734,7 @@ async def register(ctx):
         c.execute("INSERT INTO guilds(gid, oid, premium, language, caps, url, count, prefix, chancemoji) VALUES(?, ?, 0, 'en', 0, 0, 0, '&', 0)", (ctx.guild.id, ctx.guild.owner.id,))
         await ctx.send(lang(ctx)["phrases"]["register_success"])
         incrementate(ctx)
-@commands.cooldown(1, 3, commands.BucketType.user)
+@commands.cooldown(1, 1, commands.BucketType.user)
 @bot.command()
 async def poll(ctx, arg : int = 0):
     if arg == 0:
