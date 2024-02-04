@@ -1,2 +1,4 @@
 config.ini
 config.json
+.env
+polygon.py
