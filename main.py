@@ -137,12 +137,22 @@ async def on_member_join(ctx):
     welcome = c.fetchone()
     if welcome is not None:
         if welcome[0]:
-            await ctx.send(welcome[0].format(ctx.guild.name, ctx.guild.id, ctx.mention, ctx.name))
+            try:
+                if ctx.guild.system_channel is not None:
+                    await ctx.guild.system_channel.send(welcome[0].format(ctx.guild.name, ctx.guild.id, ctx.mention, ctx.name))
+                else:
+                    await ctx.send(welcome[0].format(ctx.guild.name, ctx.guild.id, ctx.mention, ctx.name))
+            except:
+                pass
 @bot.event
 async def on_guild_join(ctx):
     try:
-        c.execute("INSERT INTO guilds(gid, oid, premium, language, caps, url, count, prefix, chancemoji) VALUES(?, ?, 0, 'en', 0, 0, 0, '&', 0)", (ctx.id, ctx.owner.id,))
-    except Exception as e:
+        if ctx.preferred_locale[:2] in languages.keys():
+            locale = ctx.preffered_locale
+        else:
+            locale = "en"
+        c.execute("INSERT INTO guilds(gid, oid, premium, language, caps, url, count, prefix, chancemoji) VALUES(?, ?, 0, ?, 0, 0, 0, '&', 0)", (ctx.id, ctx.owner.id, locale,))
+    except:
         pass
 '''@bot.command()
 async def foo(ctx):
