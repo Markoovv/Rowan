@@ -35,7 +35,7 @@ def pref(bot, ctx):
     except:
         return "$"
 
-bot = commands.Bot(command_prefix=pref, intents=discord.Intents.all())
+bot = commands.AutoShardedBot(command_prefix=pref, intents=discord.Intents.all())
 bot.remove_command('help')
 
 # debug = bot.get_channel(1201226108616573039) # Специфичный канал для вывода ошибок
