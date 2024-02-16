@@ -11,11 +11,9 @@ from numexpr import evaluate
 base = sqlite3.connect("../../Databases/rowan.db", timeout=10)
 c = base.cursor()
 
-config = json.load(open("config.json"))
-
-token = config["token"]
-version = config["version"]
-sign = config["assembly"]
+token = os.getenv("TOKEN");
+version = os.getenv("VERSION");
+sign = os.getenv("ASSEMBLY");
 
 languages = {}
 
@@ -230,15 +228,15 @@ async def dice(ctx, arg:typing.Optional[int] = 6):
 @bot.command()
 async def info(ctx):
     if is_direct(ctx):
-        await ctx.send(lang(ctx)["phrases"]["info_fail"])
+        await ctx.send(lang(ctx)["phrases"]["info_fail"]).format(sign, version, count[0])
     else:
         c.execute("SELECT count FROM guilds WHERE gid = ?", (ctx.guild.id,))
         count = c.fetchone()
         if count is not None:
-            await ctx.send(lang(ctx)["phrases"]["info"].format(version, count[0]))
+            await ctx.send(lang(ctx)["phrases"]["info"].format(sign, version, count[0]))
             incrementate(ctx)
         else:
-            await ctx.send(lang(ctx)["phrases"]["info_fail"])
+            await ctx.send(lang(ctx)["phrases"]["info_fail"]).format(sign, version)
 @commands.cooldown(1, 1, commands.BucketType.user)
 @bot.command()
 async def eval(ctx, *, arg = "9+10"):
