@@ -170,7 +170,7 @@ async def prefix(ctx, arg):
 @bot.command()
 async def foo(ctx):
     await ctx.reply(lang(ctx)["phrases"]["hello"])
-    incrementate(ctx)
+    #incrementate(ctx)
 @commands.has_guild_permissions(manage_guild=True)
 @commands.guild_only()
 @bot.command()
@@ -205,7 +205,7 @@ async def purge(ctx, arg:int = 5):
 async def help(ctx, arg:typing.Optional[str] = "all"):
     if arg in lang(ctx)["help"]:
         await ctx.send(lang(ctx)["help"][arg])
-        incrementate(ctx)
+        #incrementate(ctx)
     else:
         await ctx.send(lang(ctx)["help"]["not_found"])
     if not is_direct(ctx): incrementate(ctx)
