@@ -33,7 +33,7 @@ def pref(bot, ctx):
     except:
         return "$"
 
-bot = commands.AutoShardedBot(command_prefix=pref, intents=discord.Intents.all())
+bot = commands.AutoShardedBot(command_prefix=commands.when_mentioned or (pref), intents=discord.Intents.all(), case_insensitive=True)
 bot.remove_command('help')
 
 # debug = bot.get_channel(1201226108616573039) # Специфичный канал для вывода ошибок
@@ -158,15 +158,23 @@ async def foo(ctx):
 @commands.has_guild_permissions(manage_guild=True)
 @commands.guild_only()
 @bot.command()
-async def prefix(ctx, arg):
-    try:
-        if len(arg) > 32:
-            raise TypeError
-        c.execute("UPDATE guilds SET prefix = ? WHERE gid = ?", (arg, ctx.guild.id,))
-        await ctx.reply(lang(ctx)["phrases"]["prefix_success"].format(arg))
-        incrementate(ctx)
-    except TypeError:
-        await ctx.reply(lang(ctx)["phrases"]["prefix_fail"])
+async def prefix(ctx, arg=None):
+    if arg is not None:
+        try:
+            if len(arg) > 32:
+                raise TypeError
+            c.execute("UPDATE guilds SET prefix = ? WHERE gid = ?", (arg, ctx.guild.id,))
+            await ctx.reply(lang(ctx)["phrases"]["prefix_success"].format(arg))
+            incrementate(ctx)
+        except TypeError:
+            await ctx.reply(lang(ctx)["phrases"]["prefix_fail"])
+    else:
+        try:
+            c.execute("SELECT prefix FROM guilds WHERE gid = ?", (ctx.guild.id,))
+            guild_prefix = c.fetchone()[0]
+            await ctx.send(guild_prefix)
+        except:
+            await ctx.reply(lang(ctx)["phrases"]["prefix_fail"])
 @bot.command()
 async def foo(ctx):
     await ctx.reply(lang(ctx)["phrases"]["hello"])
@@ -228,7 +236,7 @@ async def dice(ctx, arg:typing.Optional[int] = 6):
 @bot.command()
 async def info(ctx):
     if is_direct(ctx):
-        await ctx.send(lang(ctx)["phrases"]["info_fail"]).format(sign, version, count[0])
+        await ctx.send(lang(ctx)["phrases"]["info_fail"].format(sign, version))
     else:
         c.execute("SELECT count FROM guilds WHERE gid = ?", (ctx.guild.id,))
         count = c.fetchone()
@@ -236,7 +244,7 @@ async def info(ctx):
             await ctx.send(lang(ctx)["phrases"]["info"].format(sign, version, count[0]))
             incrementate(ctx)
         else:
-            await ctx.send(lang(ctx)["phrases"]["info_fail"]).format(sign, version)
+            await ctx.send(lang(ctx)["phrases"]["info_fail"].format(sign, version))
 @commands.cooldown(1, 1, commands.BucketType.user)
 @bot.command()
 async def eval(ctx, *, arg = "9+10"):
@@ -776,7 +784,7 @@ async def on_command_error(ctx, error):
         case _:
             try:
                 await ctx.send(lang(ctx)["phrases"]["error"])
-                debug = bot.get_channel(1162110295888629873)
+                debug = bot.get_channel(1201226108616573039)
                 await debug.send(f"ROWAN ИСПЫТЫВАЕТ ПРОБЛЕМУ: {error}")
             except Exception as e:
                 print(e)

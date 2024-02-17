@@ -1,4 +1,4 @@
-config.json
-dockerfile
-.dockerignore
-.env
+bot/config.json
+bot/dockerfile
+bot/.dockerignore
+bot/.env
