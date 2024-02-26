@@ -26,4 +26,4 @@ https://www.rowanbot.ru
 - re
 
 ## Руководство к установке
-Руководство по установке теперь находится на [вики](https://hub.mos.ru/videv/Rowan/-/wikis/home)
+Руководство по установке теперь находится на [вики МосХаба](https://hub.mos.ru/videv/Rowan/-/wikis/home)
